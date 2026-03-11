@@ -1,0 +1,41 @@
+## Logging level
+logging:
+  level:
+    com:
+      abanoj:
+        scheman: DEBUG
+## Database Configuration
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    open-in-view: false
+    show-sql: false
+## Exception
+server:
+  error:
+    include-message: always
+## Security
+application:
+  security:
+    jwt:
+      expiration: 900000
+      refresh:
+        expiration: 604800000
+      secret-key: ${JWT_SECRET}
+## Swagger
+springdoc:
+  swagger-ui:
+    operations-sorter: method
+    tags-sorter: alpha
+    path: /docs
+    doc-expansion: list
