@@ -1,7 +1,7 @@
 package com.abanoj.scheman.auth.entity;
 
 public enum Role {
-    USER,
+    EMPLOYEE,
     MANAGER,
     ADMIN
 }

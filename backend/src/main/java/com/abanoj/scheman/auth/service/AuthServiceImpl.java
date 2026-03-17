@@ -40,7 +40,7 @@ public class AuthServiceImpl implements AuthService {
                 .lastName(request.lastName())
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
-                .role(Role.USER)
+                .role(Role.EMPLOYEE)
                 .enabled(true)
                 .build();
 
