@@ -2,7 +2,6 @@ package com.abanoj.scheman.auth.service;
 
 import com.abanoj.scheman.auth.dto.*;
 import com.abanoj.scheman.auth.entity.RefreshToken;
-import com.abanoj.scheman.auth.entity.Role;
 import com.abanoj.scheman.auth.entity.User;
 import com.abanoj.scheman.auth.repository.RefreshTokenRepository;
 import com.abanoj.scheman.auth.repository.UserRepository;
@@ -11,7 +10,6 @@ import com.abanoj.scheman.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,29 +23,7 @@ public class AuthServiceImpl implements AuthService {
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtService jwtService;
     private final JwtProperties jwtProperties;
-    private final PasswordEncoder passwordEncoder;
     private final AuthenticationManager authenticationManager;
-
-    @Override
-    @Transactional
-    public AuthResponse register(RegisterRequest request) {
-        if (userRepository.existsByEmail(request.email())) {
-            throw new IllegalArgumentException("Email already in use");
-        }
-
-        User user = User.builder()
-                .firstName(request.firstName())
-                .lastName(request.lastName())
-                .email(request.email())
-                .password(passwordEncoder.encode(request.password()))
-                .role(Role.EMPLOYEE)
-                .enabled(true)
-                .build();
-
-        userRepository.save(user);
-
-        return generateTokens(user);
-    }
 
     @Override
     @Transactional
