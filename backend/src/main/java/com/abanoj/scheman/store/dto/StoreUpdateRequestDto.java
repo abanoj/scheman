@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Pattern;
 
 import java.util.UUID;
 
-public record StoreUpdateRequest(
+public record StoreUpdateRequestDto(
         @Schema(description = "Store ID", example = "1")
         @NotNull(message = "There must be an ID")
         UUID id,
