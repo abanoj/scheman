@@ -5,7 +5,9 @@ import com.abanoj.scheman.auth.entity.Role;
 import com.abanoj.scheman.auth.entity.User;
 import com.abanoj.scheman.auth.repository.UserRepository;
 import com.abanoj.scheman.employee.dto.EmployeeResponse;
+import com.abanoj.scheman.employee.entity.Employee;
 import com.abanoj.scheman.employee.mapper.EmployeeMapper;
+import com.abanoj.scheman.employee.repository.EmployeeRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -18,6 +20,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmployeeMapper employeeMapper;
+    private final EmployeeRepository employeeRepository;
 
     @Override
     @Transactional
@@ -36,6 +39,12 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .build();
 
         userRepository.save(user);
+
+        Employee employee = Employee.builder()
+                .user(user)
+                .build();
+
+        employeeRepository.save(employee);
 
         return employeeMapper.toResponse(user);
     }

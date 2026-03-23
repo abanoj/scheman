@@ -25,9 +25,9 @@ public class ShiftAssignment extends BaseEntity {
     @Column(nullable = false)
     private LocalDate date;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "employee_id")
+    @JoinColumn(name = "employee_id", nullable = false)
     private Employee employee;
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "shift_id")
+    @JoinColumn(name = "shift_id", nullable = false)
     private Shift shift;
 }
