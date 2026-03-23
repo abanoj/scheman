@@ -24,8 +24,8 @@ public class Store extends BaseEntity {
     private String name;
     private String address;
     private Boolean is24h;
-    private Integer phone;
-    @OneToMany(mappedBy = "store")
+    private String phone;
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private Set<Shift> shifts = new HashSet<>();
 }
