@@ -24,7 +24,7 @@ public class Employee extends BaseEntity {
     @MapsId
     @JoinColumn(name = "user_id")
     private User user;
-    @OneToMany(mappedBy = "employee")
+    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private Set<ShiftAssignment> shiftAssignments = new HashSet<>();
     private Integer weeklyContractedHours;
