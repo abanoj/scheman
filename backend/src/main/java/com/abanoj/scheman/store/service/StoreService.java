@@ -9,7 +9,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.UUID;
 
 public interface StoreService {
-    Page<StoreResponseDto> findAllStore(Pageable pageable);
+    Page<StoreResponseDto> findAllStores(Pageable pageable);
     StoreResponseDto findStoreById(UUID id);
     StoreResponseDto createStore(StoreCreateRequestDto store);
     StoreResponseDto updateStore(UUID id, StoreUpdateRequestDto store);
