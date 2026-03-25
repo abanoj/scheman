@@ -9,8 +9,8 @@ import org.springframework.data.domain.Pageable;
 import java.util.UUID;
 
 public interface ShiftAssignmentService {
-    Page<ShiftAssignmentResponseDto> findAllShiftAssignmentByShiftId(Pageable pageable, UUID shiftId);
-    Page<ShiftAssignmentResponseDto> findAllShiftAssignmentByEmployeeId(Pageable pageable, UUID employeeId);
+    Page<ShiftAssignmentResponseDto> findAllShiftsAssignmentsByShiftId(Pageable pageable, UUID shiftId);
+    Page<ShiftAssignmentResponseDto> findAllShiftsAssignmentsByEmployeeId(Pageable pageable, UUID employeeId);
     ShiftAssignmentResponseDto findShiftAssignmentById(UUID id);
     ShiftAssignmentResponseDto createShiftAssignment(UUID shiftId, ShiftAssignmentCreateRequestDto shiftAssignment);
     ShiftAssignmentResponseDto updateShiftAssignment(UUID shiftId, UUID id, ShiftAssignmentUpdateRequestDto shiftAssignment);
