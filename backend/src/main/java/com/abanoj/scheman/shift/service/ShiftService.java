@@ -9,7 +9,7 @@ import org.springframework.data.domain.Pageable;
 import java.util.UUID;
 
 public interface ShiftService {
-    Page<ShiftResponseDto> findAllShiftByStoreId(Pageable pageable, UUID storeId);
+    Page<ShiftResponseDto> findAllShiftsByStoreId(Pageable pageable, UUID storeId);
     ShiftResponseDto findShiftById(UUID id);
     ShiftResponseDto createShift(UUID storeId, ShiftCreateRequestDto shift);
     ShiftResponseDto updateShift(UUID storeId, UUID id, ShiftUpdateRequestDto shift);
