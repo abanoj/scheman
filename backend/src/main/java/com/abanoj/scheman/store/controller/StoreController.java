@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -29,15 +30,15 @@ public class StoreController {
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(summary = "Get all stores")
-    public ResponseEntity<Page<StoreResponseDto>> getAllStore(
+    public ResponseEntity<Page<StoreResponseDto>> getAllStores(
             @PageableDefault(size = 10, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable){
-        return ResponseEntity.ok(storeService.findAllStore(pageable));
+        return ResponseEntity.ok(storeService.findAllStores(pageable));
     }
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(summary = "Get a Store by ID")
-    public ResponseEntity<StoreResponseDto> getStoreById(@Parameter(description = "Store ID") UUID id){
+    public ResponseEntity<StoreResponseDto> getStoreById(@Parameter(description = "Store ID") @PathVariable UUID id){
         return ResponseEntity.ok(storeService.findStoreById(id));
     }
 
@@ -45,14 +46,14 @@ public class StoreController {
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(summary = "Create a new Store")
     public ResponseEntity<StoreResponseDto> createStore(@Valid @RequestBody StoreCreateRequestDto storeCreateRequestDto){
-        return ResponseEntity.ok(storeService.createStore(storeCreateRequestDto));
+        return ResponseEntity.status(HttpStatus.CREATED).body(storeService.createStore(storeCreateRequestDto));
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(summary = "Update an existing Store")
     public ResponseEntity<StoreResponseDto> updateStore(
-            @Parameter(description = "Store ID") UUID id,
+            @Parameter(description = "Store ID") @PathVariable UUID id,
             @Valid @RequestBody StoreUpdateRequestDto storeUpdateRequestDto){
         return ResponseEntity.ok(storeService.updateStore(id, storeUpdateRequestDto));
     }
@@ -60,7 +61,7 @@ public class StoreController {
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(summary = "Delete a Store by ID")
-    public ResponseEntity<Void> deleteStore(@Parameter(description = "Store ID") UUID id){
+    public ResponseEntity<Void> deleteStore(@Parameter(description = "Store ID") @PathVariable UUID id){
         storeService.deleteStore(id);
         return ResponseEntity.noContent().build();
     }
