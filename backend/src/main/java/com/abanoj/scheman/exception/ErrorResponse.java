@@ -9,7 +9,7 @@ import java.util.Map;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public record ErrorResponse(
-        int status,
+        Integer status,
         String error,
         String message,
         Instant timestamp,
