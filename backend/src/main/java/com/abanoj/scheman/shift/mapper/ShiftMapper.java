@@ -10,6 +10,7 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface ShiftMapper {
     @Mapping(source = "store.id", target = "storeId")
+    @Mapping(expression = "java(shift.isCrossesMidnight())", target = "isCrossesMidnight")
     ShiftResponseDto toResponseDto(Shift shift);
     @Mapping(target = "store", ignore = true )
     Shift toShift(ShiftCreateRequestDto shiftCreateRequestDto);
