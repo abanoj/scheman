@@ -42,7 +42,7 @@ public class ShiftController {
     public ResponseEntity<ShiftResponseDto> getShiftById(
             @Parameter(description = "Store ID") @PathVariable UUID storeId,
             @Parameter(description = "Shift ID") @PathVariable UUID id) {
-        return ResponseEntity.ok(shiftService.findShiftById(id));
+        return ResponseEntity.ok(shiftService.findShiftById(id, storeId));
     }
 
     @PostMapping
@@ -70,7 +70,7 @@ public class ShiftController {
     public ResponseEntity<Void> deleteShift(
             @Parameter(description = "Store ID") @PathVariable UUID storeId,
             @Parameter(description = "Shift ID") @PathVariable UUID id) {
-        shiftService.delete(storeId, id);
+        shiftService.deleteShift(storeId, id);
         return ResponseEntity.noContent().build();
     }
 }

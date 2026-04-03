@@ -17,6 +17,6 @@ public record ShiftResponseDto(
         @Schema(description = "Shift end time", example = "23:30:00")
         LocalTime endTime,
         @Schema(description = "Is shift crossing midnight?", example = "false")
-        boolean isCrossesMidnight
+        boolean crossesMidnight
 ) {
 }

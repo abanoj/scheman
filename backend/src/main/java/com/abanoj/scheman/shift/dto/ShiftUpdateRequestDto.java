@@ -8,9 +8,6 @@ import java.time.LocalTime;
 import java.util.UUID;
 
 public record ShiftUpdateRequestDto(
-        @Schema(description = "Shift ID", example = "f47ac10b-58cc-4372-a567-0e02b2c3d479")
-        @NotNull(message = "There must be an ID")
-        UUID id,
         @Schema(description = "Shift name", example = "Tarde")
         @NotBlank(message = "There must be a shift name")
         String name,

@@ -10,8 +10,8 @@ import java.util.UUID;
 
 public interface ShiftService {
     Page<ShiftResponseDto> findAllShiftsByStoreId(Pageable pageable, UUID storeId);
-    ShiftResponseDto findShiftById(UUID id);
-    ShiftResponseDto createShift(UUID storeId, ShiftCreateRequestDto shift);
-    ShiftResponseDto updateShift(UUID storeId, UUID id, ShiftUpdateRequestDto shift);
-    void delete(UUID storeId, UUID id);
+    ShiftResponseDto findShiftById(UUID id, UUID storeId);
+    ShiftResponseDto createShift(UUID storeId, ShiftCreateRequestDto shiftCreateRequestDto);
+    ShiftResponseDto updateShift(UUID storeId, UUID id, ShiftUpdateRequestDto shiftUpdateRequestDto);
+    void deleteShift(UUID storeId, UUID id);
 }

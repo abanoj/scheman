@@ -6,14 +6,18 @@ import com.abanoj.scheman.shift.dto.ShiftUpdateRequestDto;
 import com.abanoj.scheman.shift.entity.Shift;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
+import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface ShiftMapper {
     @Mapping(source = "store.id", target = "storeId")
-    @Mapping(expression = "java(shift.isCrossesMidnight())", target = "isCrossesMidnight")
     ShiftResponseDto toResponseDto(Shift shift);
+    @Mapping(target = "id", ignore = true )
     @Mapping(target = "store", ignore = true )
     Shift toShift(ShiftCreateRequestDto shiftCreateRequestDto);
+    @Mapping(target = "id", ignore = true )
+    @Mapping(target = "createdAt", ignore = true )
+    @Mapping(target = "updatedAt", ignore = true )
     @Mapping(target = "store", ignore = true )
-    Shift toShift(ShiftUpdateRequestDto shiftUpdateRequestDto);
+    void updateShiftFromDto(ShiftUpdateRequestDto shiftUpdateRequestDto, @MappingTarget Shift shift);
 }
