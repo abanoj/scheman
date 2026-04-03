@@ -12,8 +12,6 @@ public interface StoreMapper {
     StoreResponseDto toResponseDto(Store store);
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "shifts", ignore = true)
-    @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "updatedAt", ignore = true)
     Store toStore(StoreCreateRequestDto storeCreateRequestDto);
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "shifts", ignore = true)
