@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.util.UUID;
 
 public record ShiftAssignmentResponseDto(
-        @Schema(description = "Shift ID", example = "f47ac10b-58cc-4372-a567-0e02b2c3d479")
+        @Schema(description = "Shift Assignment ID", example = "f47ac10b-58cc-4372-a567-0e02b2c3d479")
         UUID id,
         @Schema(description = "Shift assignment date", example = "2026-03-23")
         LocalDate date,

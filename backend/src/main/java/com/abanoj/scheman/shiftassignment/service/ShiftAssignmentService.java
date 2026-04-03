@@ -10,9 +10,8 @@ import java.util.UUID;
 
 public interface ShiftAssignmentService {
     Page<ShiftAssignmentResponseDto> findAllShiftsAssignmentsByShiftId(Pageable pageable, UUID shiftId);
-    Page<ShiftAssignmentResponseDto> findAllShiftsAssignmentsByEmployeeId(Pageable pageable, UUID employeeId);
-    ShiftAssignmentResponseDto findShiftAssignmentById(UUID id);
-    ShiftAssignmentResponseDto createShiftAssignment(UUID shiftId, ShiftAssignmentCreateRequestDto shiftAssignment);
-    ShiftAssignmentResponseDto updateShiftAssignment(UUID shiftId, UUID id, ShiftAssignmentUpdateRequestDto shiftAssignment);
+    ShiftAssignmentResponseDto findShiftAssignmentById(UUID shiftId, UUID id);
+    ShiftAssignmentResponseDto createShiftAssignment(UUID shiftId, ShiftAssignmentCreateRequestDto shiftAssignmentCreateRequestDto);
+    ShiftAssignmentResponseDto updateShiftAssignment(UUID shiftId, UUID id, ShiftAssignmentUpdateRequestDto shiftAssignmentUpdateRequestDto);
     void delete(UUID shiftId, UUID id);
 }

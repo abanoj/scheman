@@ -42,7 +42,7 @@ public class ShiftAssignmentController {
     public ResponseEntity<ShiftAssignmentResponseDto> getShiftAssignmentById(
             @Parameter(description = "Shift ID") @PathVariable UUID shiftId,
             @Parameter(description = "Shift Assignment ID") @PathVariable UUID id) {
-        return ResponseEntity.ok(shiftAssignmentService.findShiftAssignmentById(id));
+        return ResponseEntity.ok(shiftAssignmentService.findShiftAssignmentById(shiftId, id));
     }
 
     @PostMapping
