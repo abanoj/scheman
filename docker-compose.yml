@@ -14,17 +14,6 @@ services:
       - db_network
     restart: unless-stopped
 
-  adminer:
-    image: adminer:5.4.2-standalone
-    container_name: adminer
-    ports:
-      - "8888:8080"
-    networks:
-      - db_network
-    depends_on:
-      - db
-    restart: always
-
 networks:
   db_network:
     driver: bridge
