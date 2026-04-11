@@ -1,6 +1,6 @@
 package com.abanoj.scheman.auth.service;
 
-import com.abanoj.scheman.auth.entity.AdminProperties;
+import com.abanoj.scheman.config.AdminProperties;
 import com.abanoj.scheman.auth.entity.Role;
 import com.abanoj.scheman.auth.entity.User;
 import com.abanoj.scheman.auth.repository.UserRepository;

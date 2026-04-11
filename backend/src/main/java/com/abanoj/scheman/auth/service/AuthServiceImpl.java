@@ -2,16 +2,19 @@ package com.abanoj.scheman.auth.service;
 
 import com.abanoj.scheman.auth.dto.*;
 import com.abanoj.scheman.auth.entity.RefreshToken;
+import com.abanoj.scheman.auth.entity.Role;
 import com.abanoj.scheman.auth.entity.User;
 import com.abanoj.scheman.auth.repository.RefreshTokenRepository;
 import com.abanoj.scheman.auth.repository.UserRepository;
 import com.abanoj.scheman.exception.AuthenticationFailedException;
+import com.abanoj.scheman.exception.ConflictException;
 import com.abanoj.scheman.security.JwtProperties;
 import com.abanoj.scheman.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,10 +30,11 @@ public class AuthServiceImpl implements AuthService {
     private final JwtService jwtService;
     private final JwtProperties jwtProperties;
     private final AuthenticationManager authenticationManager;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     @Transactional
-    public AuthResponse login(LoginRequest request) {
+    public AuthResponseDto login(LoginRequestDto request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.email(), request.password())
         );
@@ -45,7 +49,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public AuthResponse refresh(RefreshTokenRequest request) {
+    public AuthResponseDto refresh(RefreshTokenRequestDto request) {
         RefreshToken storedToken = refreshTokenRepository.findByTokenAndRevokedFalse(request.refreshToken())
                 .orElseThrow(() -> new AuthenticationFailedException("Invalid refresh token"));
 
@@ -61,6 +65,13 @@ public class AuthServiceImpl implements AuthService {
             throw new AuthenticationFailedException("Invalid refresh token");
         }
 
+        if(!storedToken.getUser().isEnabled()){
+            storedToken.setRevoked(true);
+            refreshTokenRepository.save(storedToken);
+            log.warn("User account is disable for user: {}", storedToken.getUser().getEmail());
+            throw new AuthenticationFailedException("User account is disabled");
+        }
+
         storedToken.setRevoked(true);
         refreshTokenRepository.save(storedToken);
         log.info("Refresh token generated for user: {}", storedToken.getUser().getEmail());
@@ -69,7 +80,7 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     @Transactional
-    public void logout(RefreshTokenRequest request) {
+    public void logout(RefreshTokenRequestDto request) {
         RefreshToken storedToken = refreshTokenRepository.findByTokenAndRevokedFalse(request.refreshToken())
                 .orElseThrow(() -> new AuthenticationFailedException("Invalid refresh token"));
 
@@ -78,7 +89,30 @@ public class AuthServiceImpl implements AuthService {
         log.info("Successfully logout for user: {}", storedToken.getUser().getEmail());
     }
 
-    private AuthResponse generateTokens(User user) {
+    @Override
+    @Transactional
+    public ManagerResponseDto createManager(ManagerCreateRequestDto managerCreateRequestDto) {
+        if(userRepository.existsByEmail(managerCreateRequestDto.email())){
+            throw new ConflictException("Email already in use");
+        }
+        User user = User.builder()
+                .firstName(managerCreateRequestDto.firstName())
+                .lastName(managerCreateRequestDto.lastName())
+                .email(managerCreateRequestDto.email())
+                .password(passwordEncoder.encode(managerCreateRequestDto.password()))
+                .role(Role.MANAGER)
+                .build();
+        userRepository.save(user);
+        log.info("Create manager: {}", user.getEmail());
+        return ManagerResponseDto.builder()
+                .id(user.getId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .build();
+    }
+
+    private AuthResponseDto generateTokens(User user) {
         String accessToken = jwtService.generateAccessToken(user);
         String refreshTokenStr = jwtService.generateRefreshToken(user);
 
@@ -91,7 +125,7 @@ public class AuthServiceImpl implements AuthService {
 
         refreshTokenRepository.save(refreshToken);
 
-        return AuthResponse.builder()
+        return AuthResponseDto.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshTokenStr)
                 .build();

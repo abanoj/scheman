@@ -4,7 +4,7 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.Builder;
 
 @Builder
-public record RefreshTokenRequest(
+public record RefreshTokenRequestDto(
         @NotBlank(message = "Refresh token is required")
         String refreshToken
 ) {
