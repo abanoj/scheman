@@ -4,6 +4,7 @@ import com.abanoj.scheman.shared.BaseEntity;
 import com.abanoj.scheman.store.entity.Store;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalTime;
 import java.util.UUID;
@@ -12,9 +13,9 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 @Entity
-@Table(name = "shift")
+@Table(name = "shifts")
 public class Shift extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

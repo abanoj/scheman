@@ -1,7 +1,9 @@
 package com.abanoj.scheman.auth.entity;
 
+import com.abanoj.scheman.shared.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -10,10 +12,10 @@ import java.util.UUID;
 @Table(name = "refresh_tokens")
 @Getter
 @Setter
-@Builder
+@SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
-public class RefreshToken {
+public class RefreshToken extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

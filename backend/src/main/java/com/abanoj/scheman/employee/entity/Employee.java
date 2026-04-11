@@ -5,6 +5,7 @@ import com.abanoj.scheman.shared.BaseEntity;
 import com.abanoj.scheman.shiftassignment.entity.ShiftAssignment;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -14,12 +15,14 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 @Entity
 @Table(name = "employee")
 public class Employee extends BaseEntity {
     @Id
     private UUID id;
+    @Column(unique = true)
+    private String dni;
     @OneToOne(fetch = FetchType.LAZY)
     @MapsId
     @JoinColumn(name = "user_id")

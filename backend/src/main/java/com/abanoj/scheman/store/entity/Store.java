@@ -4,6 +4,7 @@ import com.abanoj.scheman.shared.BaseEntity;
 import com.abanoj.scheman.shift.entity.Shift;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -13,9 +14,9 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 @Entity
-@Table(name = "store")
+@Table(name = "stores")
 public class Store extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

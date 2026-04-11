@@ -5,6 +5,7 @@ import com.abanoj.scheman.shared.BaseEntity;
 import com.abanoj.scheman.shift.entity.Shift;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -13,9 +14,9 @@ import java.util.UUID;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 @Entity
-@Table(name = "shift_assignment", uniqueConstraints = {
+@Table(name = "shift_assignments", uniqueConstraints = {
         @UniqueConstraint(columnNames = {"employee_id", "shift_id", "date"})
 })
 public class ShiftAssignment extends BaseEntity {
