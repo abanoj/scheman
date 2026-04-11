@@ -12,8 +12,10 @@ import org.mapstruct.MappingTarget;
 public interface ShiftMapper {
     @Mapping(source = "store.id", target = "storeId")
     ShiftResponseDto toResponseDto(Shift shift);
-    @Mapping(target = "id", ignore = true )
-    @Mapping(target = "store", ignore = true )
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "store", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "updatedAt", ignore = true)
     Shift toShift(ShiftCreateRequestDto shiftCreateRequestDto);
     @Mapping(target = "id", ignore = true )
     @Mapping(target = "createdAt", ignore = true )

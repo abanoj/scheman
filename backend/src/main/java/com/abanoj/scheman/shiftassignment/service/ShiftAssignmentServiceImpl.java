@@ -40,6 +40,14 @@ public class ShiftAssignmentServiceImpl implements ShiftAssignmentService{
 
     @Override
     @Transactional(readOnly = true)
+    public Page<ShiftAssignmentResponseDto> findAllShiftsAssignmentsByEmployeeId(Pageable pageable, UUID employeeId) {
+        return shiftAssignmentRepository
+                .findAllByEmployeeId(pageable, employeeId)
+                .map(shiftAssignmentMapper::toResponseDto);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public ShiftAssignmentResponseDto findShiftAssignmentById(UUID shiftId, UUID id) {
         return shiftAssignmentMapper.toResponseDto(findShiftAssignmentOrThrow(shiftId, id));
     }
@@ -48,6 +56,9 @@ public class ShiftAssignmentServiceImpl implements ShiftAssignmentService{
     @Transactional
     public ShiftAssignmentResponseDto createShiftAssignment(UUID shiftId, ShiftAssignmentCreateRequestDto shiftAssignmentCreateRequestDto) {
         UUID employeeId = shiftAssignmentCreateRequestDto.employeeId();
+        if(!shiftId.equals(shiftAssignmentCreateRequestDto.shiftId())){
+            throw new IllegalArgumentException("Shift Id and Shift Assignment shift id did not match");
+        }
         Shift shift = shiftRepository
                 .findById(shiftId)
                 .orElseThrow(() -> new ResourceNotFoundException("Not found shift with id " + shiftId));
@@ -58,7 +69,7 @@ public class ShiftAssignmentServiceImpl implements ShiftAssignmentService{
         shiftAssignment.setShift(shift);
         shiftAssignment.setEmployee(employee);
         shiftAssignmentRepository.save(shiftAssignment);
-        log.info("Created Shift Assignment with id {}", shiftAssignment.getId());
+        log.debug("Created Shift Assignment with id {}", shiftAssignment.getId());
         return shiftAssignmentMapper.toResponseDto(shiftAssignment);
     }
 
@@ -66,6 +77,9 @@ public class ShiftAssignmentServiceImpl implements ShiftAssignmentService{
     @Transactional
     public ShiftAssignmentResponseDto updateShiftAssignment(UUID shiftId, UUID id, ShiftAssignmentUpdateRequestDto shiftAssignmentUpdateRequestDto) {
         UUID employeeId = shiftAssignmentUpdateRequestDto.employeeId();
+        if(!shiftId.equals(shiftAssignmentUpdateRequestDto.shiftId())){
+            throw new IllegalArgumentException("Shift Id and Shift Assignment shift id did not match");
+        }
         Shift shift = shiftRepository
                 .findById(shiftId)
                 .orElseThrow(() -> new ResourceNotFoundException("Not found shift with id " + shiftId));
@@ -79,7 +93,7 @@ public class ShiftAssignmentServiceImpl implements ShiftAssignmentService{
         shiftAssignment.setShift(shift);
         shiftAssignment.setEmployee(employee);
         shiftAssignmentRepository.save(shiftAssignment);
-        log.info("Updated Shift Assignment with id {}", shiftAssignment.getId());
+        log.debug("Updated Shift Assignment with id {}", shiftAssignment.getId());
         return shiftAssignmentMapper.toResponseDto(shiftAssignment);
     }
 
@@ -90,7 +104,7 @@ public class ShiftAssignmentServiceImpl implements ShiftAssignmentService{
             throw new ResourceNotFoundException("Not found shift assignment with id " + id);
         }
         shiftAssignmentRepository.deleteById(id);
-        log.info("Deleted Shift Assignment {}", id);
+        log.debug("Deleted Shift Assignment {}", id);
     }
 
     private ShiftAssignment findShiftAssignmentOrThrow(UUID shiftId, UUID id){

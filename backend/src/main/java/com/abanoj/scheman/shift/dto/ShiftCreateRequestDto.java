@@ -8,7 +8,7 @@ import java.time.LocalTime;
 import java.util.UUID;
 
 public record ShiftCreateRequestDto(
-        @Schema(description = "Shift name", example = "Tarde")
+        @Schema(description = "Shift name", example = "Night")
         @NotBlank(message = "There must be a shift name")
         String name,
         @Schema(description = "Store ID", example = "f47ac10b-58cc-4372-a567-0e02b2c3d479")
