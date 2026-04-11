@@ -32,7 +32,6 @@ public class AuthController {
 
     @PostMapping("/logout")
     @Operation(summary = "Revoke refresh token")
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     public ResponseEntity<Void> logout(@Valid @RequestBody RefreshTokenRequest request) {
         authService.logout(request);
         return ResponseEntity.noContent().build();
