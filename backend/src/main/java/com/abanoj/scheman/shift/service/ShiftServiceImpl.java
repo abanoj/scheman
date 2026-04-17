@@ -44,16 +44,13 @@ public class ShiftServiceImpl implements ShiftService{
     @Override
     @Transactional
     public ShiftResponseDto createShift(UUID storeId, ShiftCreateRequestDto shiftCreateRequestDto) {
-        if(!shiftCreateRequestDto.storeId().equals(storeId)){
-            throw new IllegalArgumentException("Store id and Shift store id did not match");
-        }
         Store store = storeRepository
                 .findById(storeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Not found store with id " + storeId));
         Shift shift = shiftMapper.toShift(shiftCreateRequestDto);
         shift.setStore(store);
         shiftRepository.save(shift);
-        log.info("Created Shift with id {}", shift.getId());
+        log.debug("Created Shift with id {}", shift.getId());
         return shiftMapper.toResponseDto(shift);
     }
 
@@ -70,7 +67,7 @@ public class ShiftServiceImpl implements ShiftService{
         shiftMapper.updateShiftFromDto(shiftUpdateRequestDto, shift);
         shift.setStore(store);
         shiftRepository.save(shift);
-        log.info("Updated Shift with id {}", shift.getId());
+        log.debug("Updated Shift with id {}", shift.getId());
         return shiftMapper.toResponseDto(shift);
     }
 
@@ -81,7 +78,7 @@ public class ShiftServiceImpl implements ShiftService{
             throw new ResourceNotFoundException("Not found shift with id " + id);
         }
         shiftRepository.deleteById(id);
-        log.info("Shift {} deleted", id);
+        log.debug("Shift {} deleted", id);
     }
 
     private Shift findShiftOrThrow(UUID id, UUID storeId){

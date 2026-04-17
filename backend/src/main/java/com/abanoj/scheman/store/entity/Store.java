@@ -27,6 +27,7 @@ public class Store extends BaseEntity {
     private Boolean is24h;
     private String phone;
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
+    @org.hibernate.annotations.BatchSize(size = 50)
     @Builder.Default
     private Set<Shift> shifts = new HashSet<>();
 }

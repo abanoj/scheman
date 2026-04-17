@@ -14,9 +14,6 @@ public record ShiftAssignmentCreateRequestDto(
         LocalDate date,
         @Schema(description = "Employee ID", example = "f47ac10b-58cc-4372-a567-0e02b2c3d479")
         @NotNull(message = "There must be an employee ID")
-        UUID employeeId,
-        @Schema(description = "Shift ID", example = "f47ac10b-58cc-4372-a567-0e02b2c3d479")
-        @NotNull(message = "There must be a shift ID")
-        UUID shiftId
+        UUID employeeId
 ) {
 }
