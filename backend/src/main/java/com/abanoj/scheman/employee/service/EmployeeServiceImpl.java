@@ -1,6 +1,6 @@
 package com.abanoj.scheman.employee.service;
 
-import com.abanoj.scheman.auth.dto.RegisterRequest;
+import com.abanoj.scheman.employee.dto.EmployeeCreateRequestDto;
 import com.abanoj.scheman.auth.entity.Role;
 import com.abanoj.scheman.auth.entity.User;
 import com.abanoj.scheman.auth.repository.UserRepository;
@@ -13,6 +13,8 @@ import com.abanoj.scheman.exception.ConflictException;
 import com.abanoj.scheman.exception.ResourceNotFoundException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,8 +32,16 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final EmployeeRepository employeeRepository;
 
     @Override
+    @Transactional(readOnly = true)
+    public Page<EmployeeResponseDto> findAllEmployees(Pageable pageable) {
+        return employeeRepository
+                .findAllWithUser(pageable)
+                .map(employeeMapper::toResponseDto);
+    }
+
+    @Override
     @Transactional
-    public EmployeeResponseDto create(RegisterRequest request) {
+    public EmployeeResponseDto create(EmployeeCreateRequestDto request) {
         if (userRepository.existsByEmail(request.email())) {
             throw new ConflictException("Email already in use");
         }
@@ -55,29 +65,53 @@ public class EmployeeServiceImpl implements EmployeeService {
 
         employeeRepository.save(employee);
         log.info("New employee created: {} {}", request.firstName(), request.lastName());
-        return employeeMapper.toResponseDto(employee, user);
+        return employeeMapper.toResponseUserEmployeeDto(employee, user);
     }
 
     @Override
     @Transactional
-    public EmployeeResponseDto updatedEmployee(UUID employeeId, EmployeeUpdateRequestDto employeeUpdateRequestDto) {
+    public EmployeeResponseDto updateEmployee(UUID employeeId, EmployeeUpdateRequestDto employeeUpdateRequestDto) {
         Employee employee = employeeRepository
-                .findById(employeeId)
+                .findByIdWithUser(employeeId)
                 .orElseThrow(()-> new ResourceNotFoundException("Not found employee with id: " + employeeId));
-        User user = userRepository
-                .findById(employeeId)
-                .orElseThrow(()-> new ResourceNotFoundException("Not found user with id: " + employeeId));
+        User user = employee.getUser();
+        employeeMapper.updateUserFromDto(employeeUpdateRequestDto, user);
         employeeMapper.updateEmployeeFromDto(employeeUpdateRequestDto, employee);
+        userRepository.save(user);
         employeeRepository.save(employee);
-        log.info("Updated employee with id {}", employeeId);
-        return employeeMapper.toResponseDto(employee, user);
+        log.debug("Updated employee with id {}", employeeId);
+        return employeeMapper.toResponseUserEmployeeDto(employee, user);
     }
 
     @Override
     @Transactional(readOnly = true)
     public EmployeeResponseDto findEmployeeById(UUID employeeId) {
-        Employee employee = employeeRepository.findById(employeeId).orElseThrow(()-> new ResourceNotFoundException("Not found employee with employeeId " + employeeId));
-        User user = userRepository.findById(employee.getUser().getId()).orElseThrow(()-> new ResourceNotFoundException("Not found user with employeeId " + employee.getUser().getId()));
-        return employeeMapper.toResponseDto(employee, user);
+        Employee employee = employeeRepository.findByIdWithUser(employeeId).orElseThrow(()-> new ResourceNotFoundException("Not found employee with employeeId " + employeeId));
+        User user = employee.getUser();
+        return employeeMapper.toResponseUserEmployeeDto(employee, user);
+    }
+
+    @Override
+    @Transactional
+    public void disableEmployeeById(UUID employeeId) {
+        Employee employee = employeeRepository
+                .findByIdWithUser(employeeId)
+                .orElseThrow(()-> new ResourceNotFoundException("Not found employee with employeeId " + employeeId));
+        User user = employee.getUser();
+        user.setEnabled(false);
+        userRepository.save(user);
+        log.debug("Employee disabled {}", user.getEmail());
+    }
+
+    @Override
+    @Transactional
+    public void enableEmployeeById(UUID employeeId) {
+        Employee employee = employeeRepository
+                .findByIdWithUser(employeeId)
+                .orElseThrow(()-> new ResourceNotFoundException("Not found employee with employeeId " + employeeId));
+        User user = employee.getUser();
+        user.setEnabled(true);
+        userRepository.save(user);
+        log.debug("Employee enabled {}", user.getEmail());
     }
 }

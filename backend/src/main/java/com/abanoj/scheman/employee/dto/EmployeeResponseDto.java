@@ -20,6 +20,6 @@ public record EmployeeResponseDto(
         @Schema(description = "Store ID", example = "f47ac10b-58cc-4372-a567-0e02b2c3d479")
         UUID userId,
         @Schema(description = "Weekly contracted hours", example = "40")
-        String weeklyContractedHours
+        Integer weeklyContractedHours
 ) {
 }
