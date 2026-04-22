@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.security.core.AuthenticationException;
@@ -15,6 +16,7 @@ import java.io.IOException;
 import java.time.Instant;
 
 @Component
+@Slf4j
 @RequiredArgsConstructor
 public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
 
@@ -25,13 +27,16 @@ public class JwtAuthenticationEntryPoint implements AuthenticationEntryPoint {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 
-        ErrorResponse errorResponse = ErrorResponse.builder()
-                .status(HttpStatus.UNAUTHORIZED.value())
-                .error(HttpStatus.UNAUTHORIZED.getReasonPhrase())
-                .message("Authentication is required to access this resource")
-                .timestamp(Instant.now())
-                .path(request.getRequestURI())
-                .build();
+        log.warn("Unauthenticated access attempt to {}", request.getRequestURI());
+
+        ErrorResponse errorResponse = new ErrorResponse(
+                HttpStatus.UNAUTHORIZED.value(),
+                HttpStatus.UNAUTHORIZED.getReasonPhrase(),
+                "Authentication is required to access this resource",
+                Instant.now(),
+                request.getRequestURI(),
+                null
+        );
 
         objectMapper.writeValue(response.getOutputStream(), errorResponse);
     }
