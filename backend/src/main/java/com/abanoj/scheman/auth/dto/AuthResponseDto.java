@@ -1,9 +1,7 @@
 package com.abanoj.scheman.auth.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import lombok.Builder;
 
-@Builder
 public record AuthResponseDto(
         @JsonProperty("access_token")
         String accessToken,

@@ -4,9 +4,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
-import lombok.Builder;
 
-@Builder
 public record EmployeeUpdateRequestDto(
         @Schema(description = "Employee DNI or NIE", example = "Y8479910J")
         @Size(min = 9, max = 9, message = "DNI must be exactly 9 characters")
