@@ -62,7 +62,7 @@ public class EmployeeController {
     }
 
     @PatchMapping("/{employeeId}")
-    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER') or #employeeId == authentication.principal.id")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
     @Operation(summary = "Update employee information")
     public ResponseEntity<EmployeeResponseDto> updateEmployeeById(@Parameter(description = "Employee id") @PathVariable UUID employeeId,
                                                                   @Valid @RequestBody EmployeeUpdateRequestDto employeeUpdateRequestDto){

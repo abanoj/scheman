@@ -50,7 +50,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .firstName(request.firstName())
                 .lastName(request.lastName())
                 .email(request.email())
-                .password(passwordEncoder.encode(request.password()))
+                .password(passwordEncoder.encode(request.dni()))
                 .role(Role.EMPLOYEE)
                 .enabled(true)
                 .build();
@@ -100,7 +100,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         User user = employee.getUser();
         user.setEnabled(false);
         userRepository.save(user);
-        log.debug("Employee disabled {}", user.getEmail());
+        log.info("Employee disabled {}", user.getEmail());
     }
 
     @Override
@@ -112,6 +112,6 @@ public class EmployeeServiceImpl implements EmployeeService {
         User user = employee.getUser();
         user.setEnabled(true);
         userRepository.save(user);
-        log.debug("Employee enabled {}", user.getEmail());
+        log.info("Employee enabled {}", user.getEmail());
     }
 }
