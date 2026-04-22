@@ -8,3 +8,19 @@ spring:
       enabled: always
   profiles:
     active: dev
+## Actuator
+management:
+  server:
+    port: 8081
+  endpoints:
+    web:
+      exposure:
+        include: health, info, metrics
+  endpoint:
+    health:
+      show-details: never
+    shutdown:
+      enabled: false
+  info:
+    env:
+      enabled: true
