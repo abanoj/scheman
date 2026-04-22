@@ -8,6 +8,7 @@ import com.abanoj.scheman.auth.repository.RefreshTokenRepository;
 import com.abanoj.scheman.auth.repository.UserRepository;
 import com.abanoj.scheman.exception.AuthenticationFailedException;
 import com.abanoj.scheman.exception.ConflictException;
+import com.abanoj.scheman.exception.ResourceNotFoundException;
 import com.abanoj.scheman.security.JwtProperties;
 import com.abanoj.scheman.security.JwtService;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
+import java.util.Objects;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -68,14 +71,28 @@ public class AuthServiceImpl implements AuthService {
         if(!storedToken.getUser().isEnabled()){
             storedToken.setRevoked(true);
             refreshTokenRepository.save(storedToken);
-            log.warn("User account is disable for user: {}", storedToken.getUser().getEmail());
+            log.warn("User account is disabled for user: {}", storedToken.getUser().getEmail());
             throw new AuthenticationFailedException("User account is disabled");
         }
 
         storedToken.setRevoked(true);
         refreshTokenRepository.save(storedToken);
-        log.info("Refresh token generated for user: {}", storedToken.getUser().getEmail());
+        log.debug("Refresh token generated for user: {}", storedToken.getUser().getEmail());
         return generateTokens(storedToken.getUser());
+    }
+
+    @Override
+    @Transactional
+    public void changePassword(UUID id, ChangePasswordRequestDto request) {
+        User user = userRepository
+                .findById(id)
+                .orElseThrow(()-> new ResourceNotFoundException("Not found user with id " + id));
+        if(!passwordEncoder.matches(request.oldPassword(), user.getPassword())){
+            throw new AuthenticationFailedException("Invalid password");
+        }
+        user.setPassword(passwordEncoder.encode(request.newPassword()));
+        userRepository.save(user);
+        log.debug("Password change successfully for: {}", user.getEmail());
     }
 
     @Override
@@ -103,13 +120,13 @@ public class AuthServiceImpl implements AuthService {
                 .role(Role.MANAGER)
                 .build();
         userRepository.save(user);
-        log.info("Create manager: {}", user.getEmail());
-        return ManagerResponseDto.builder()
-                .id(user.getId())
-                .firstName(user.getFirstName())
-                .lastName(user.getLastName())
-                .email(user.getEmail())
-                .build();
+        log.info("Manager created: {}", user.getEmail());
+        return new ManagerResponseDto(
+                user.getId(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail()
+        );
     }
 
     private AuthResponseDto generateTokens(User user) {
@@ -125,9 +142,6 @@ public class AuthServiceImpl implements AuthService {
 
         refreshTokenRepository.save(refreshToken);
 
-        return AuthResponseDto.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshTokenStr)
-                .build();
+        return new AuthResponseDto(accessToken, refreshTokenStr);
     }
 }

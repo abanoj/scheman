@@ -23,7 +23,7 @@ public class AdminInitializer {
     public CommandLineRunner createAdminUser(){
         return args -> {
             if (userRepository.existsByEmail(adminProperties.getEmail())){
-                log.warn("User email already exist: {}", adminProperties.getEmail());
+                log.info("User email already exists, skipping creation");
                 return;
             }
             User admin = User.builder()
@@ -35,7 +35,7 @@ public class AdminInitializer {
                     .build();
 
             userRepository.save(admin);
-            log.info("Created user admin with email {}: ", admin.getEmail());
+            log.info("Created user admin with email: {}", admin.getEmail());
         };
     }
 

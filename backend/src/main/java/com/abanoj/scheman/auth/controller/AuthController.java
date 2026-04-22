@@ -7,7 +7,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/v1/auth")
@@ -21,6 +24,14 @@ public class AuthController {
     @Operation(summary = "Authenticate user and return tokens")
     public ResponseEntity<AuthResponseDto> login(@Valid @RequestBody LoginRequestDto request) {
         return ResponseEntity.ok(authService.login(request));
+    }
+
+    @PatchMapping("/{userId}/password")
+    @PreAuthorize("#userId == authentication.principal.id")
+    @Operation(summary = "Change the current password")
+    public ResponseEntity<Void> changePassword(UUID userId, @Valid @RequestBody ChangePasswordRequestDto changePasswordRequestDto){
+        authService.changePassword(userId, changePasswordRequestDto);
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/refresh")
