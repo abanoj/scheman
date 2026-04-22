@@ -2,6 +2,7 @@ package com.abanoj.scheman.shiftassignment.service;
 
 import com.abanoj.scheman.employee.entity.Employee;
 import com.abanoj.scheman.employee.repository.EmployeeRepository;
+import com.abanoj.scheman.exception.ConflictException;
 import com.abanoj.scheman.exception.ResourceNotFoundException;
 import com.abanoj.scheman.shift.entity.Shift;
 import com.abanoj.scheman.shift.repository.ShiftRepository;
@@ -18,6 +19,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -62,6 +66,8 @@ public class ShiftAssignmentServiceImpl implements ShiftAssignmentService{
         Employee employee = employeeRepository
                 .findById(employeeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Not found employee with id " + employeeId));
+        validateNoOverlap(employeeId, shiftAssignmentCreateRequestDto.date(), shift, null);
+
         ShiftAssignment shiftAssignment = shiftAssignmentMapper.toShiftAssignment(shiftAssignmentCreateRequestDto);
         shiftAssignment.setShift(shift);
         shiftAssignment.setEmployee(employee);
@@ -86,6 +92,8 @@ public class ShiftAssignmentServiceImpl implements ShiftAssignmentService{
         Employee employee = employeeRepository
                 .findById(employeeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Not found employee with id " + employeeId));
+        validateNoOverlap(employeeId, shiftAssignmentUpdateRequestDto.date(), shift, id);
+
         shiftAssignmentMapper.updateShiftAssignmentFromDto(shiftAssignmentUpdateRequestDto, shiftAssignment);
         shiftAssignment.setShift(shift);
         shiftAssignment.setEmployee(employee);
@@ -104,7 +112,37 @@ public class ShiftAssignmentServiceImpl implements ShiftAssignmentService{
         log.debug("Deleted Shift Assignment {}", id);
     }
 
-    private ShiftAssignment findShiftAssignmentOrThrow(UUID shiftId, UUID id){
+    private void validateNoOverlap(UUID employeeId, LocalDate date, Shift newShift, UUID excludeAssignmentId) {
+        List<LocalDate> datesToCheck = List.of(date, date.minusDays(1));
+
+        List<ShiftAssignment> existing = shiftAssignmentRepository
+                .findByEmployeeIdAndDateIn(employeeId, datesToCheck);
+
+        for (ShiftAssignment assignment : existing) {
+            if (excludeAssignmentId != null && excludeAssignmentId.equals(assignment.getId())) {
+                continue;
+            }
+            if (overlaps(assignment.getShift(), assignment.getDate(), newShift, date)) {
+                throw new ConflictException("Employee already has an overlapping shift on " + date);
+            }
+        }
+    }
+
+    private boolean overlaps(Shift a, LocalDate dateA, Shift b, LocalDate dateB) {
+        LocalDateTime startA = dateA.atTime(a.getStartTime());
+        LocalDateTime endA = a.isCrossesMidnight()
+                ? dateA.plusDays(1).atTime(a.getEndTime())
+                : dateA.atTime(a.getEndTime());
+
+        LocalDateTime startB = dateB.atTime(b.getStartTime());
+        LocalDateTime endB = b.isCrossesMidnight()
+                ? dateB.plusDays(1).atTime(b.getEndTime())
+                : dateB.atTime(b.getEndTime());
+
+        return startA.isBefore(endB) && startB.isBefore(endA);
+    }
+
+    private ShiftAssignment findShiftAssignmentOrThrow(UUID shiftId, UUID id) {
         return shiftAssignmentRepository
                 .findByIdAndShiftId(id, shiftId)
                 .orElseThrow(() -> new ResourceNotFoundException("Not found shift assignment with id " + id));
