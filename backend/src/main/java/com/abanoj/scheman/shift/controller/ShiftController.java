@@ -1,11 +1,15 @@
 package com.abanoj.scheman.shift.controller;
 
+import com.abanoj.scheman.exception.ErrorResponse;
 import com.abanoj.scheman.shift.dto.ShiftCreateRequestDto;
 import com.abanoj.scheman.shift.dto.ShiftResponseDto;
 import com.abanoj.scheman.shift.dto.ShiftUpdateRequestDto;
 import com.abanoj.scheman.shift.service.ShiftService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -29,7 +33,13 @@ public class ShiftController {
 
     @GetMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
-    @Operation(summary = "Get all shifts for a store")
+    @Operation(summary = "Get all shifts for a store", responses = {
+            @ApiResponse(responseCode = "200", description = "Shifts retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Not authenticated",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
     public ResponseEntity<Page<ShiftResponseDto>> getAllShiftsByStoreId(
             @PageableDefault(size = 10, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable,
             @Parameter(description = "Store ID") @PathVariable UUID storeId) {
@@ -38,7 +48,15 @@ public class ShiftController {
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
-    @Operation(summary = "Get a shift by ID")
+    @Operation(summary = "Get a shift by ID", responses = {
+            @ApiResponse(responseCode = "200", description = "Shift retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Not authenticated",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Shift not found",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
     public ResponseEntity<ShiftResponseDto> getShiftById(
             @Parameter(description = "Store ID") @PathVariable UUID storeId,
             @Parameter(description = "Shift ID") @PathVariable UUID id) {
@@ -47,7 +65,19 @@ public class ShiftController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
-    @Operation(summary = "Create a new shift")
+    @Operation(summary = "Create a new shift", responses = {
+            @ApiResponse(responseCode = "201", description = "Shift created successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request body",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Not authenticated",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Store not found",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = "Shift conflicts with existing shift",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
     public ResponseEntity<ShiftResponseDto> createShift(
             @Parameter(description = "Store ID") @PathVariable UUID storeId,
             @Valid @RequestBody ShiftCreateRequestDto shiftCreateRequestDto) {
@@ -56,7 +86,17 @@ public class ShiftController {
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
-    @Operation(summary = "Update an existing shift")
+    @Operation(summary = "Update an existing shift", responses = {
+            @ApiResponse(responseCode = "200", description = "Shift updated successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid request body",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "401", description = "Not authenticated",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Shift not found",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
     public ResponseEntity<ShiftResponseDto> updateShift(
             @Parameter(description = "Store ID") @PathVariable UUID storeId,
             @Parameter(description = "Shift ID") @PathVariable UUID id,
@@ -66,7 +106,17 @@ public class ShiftController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
-    @Operation(summary = "Delete a shift by ID")
+    @Operation(summary = "Delete a shift by ID", responses = {
+            @ApiResponse(responseCode = "204", description = "Shift deleted successfully"),
+            @ApiResponse(responseCode = "401", description = "Not authenticated",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "404", description = "Shift not found",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "409", description = "Shift has active assignments",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
     public ResponseEntity<Void> deleteShift(
             @Parameter(description = "Store ID") @PathVariable UUID storeId,
             @Parameter(description = "Shift ID") @PathVariable UUID id) {
