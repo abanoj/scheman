@@ -87,6 +87,11 @@ public class AuthServiceImpl implements AuthService {
         User user = userRepository
                 .findById(id)
                 .orElseThrow(()-> new ResourceNotFoundException("Not found user with id " + id));
+
+        if(passwordEncoder.matches(request.newPassword(), user.getPassword())){
+            throw new IllegalArgumentException("New password must be different");
+        }
+
         if(!passwordEncoder.matches(request.oldPassword(), user.getPassword())){
             throw new AuthenticationFailedException("Invalid password");
         }
