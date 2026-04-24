@@ -35,8 +35,8 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Transactional(readOnly = true)
     public Page<EmployeeResponseDto> findAllEmployees(Pageable pageable) {
         return employeeRepository
-                .findAllWithUser(pageable)
-                .map(employeeMapper::toResponseDto);
+                .findAll(pageable)
+                .map(employee -> employeeMapper.toResponseUserEmployeeDto(employee, employee.getUser()));
     }
 
     @Override
