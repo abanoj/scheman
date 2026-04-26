@@ -57,9 +57,6 @@ public class ShiftServiceImpl implements ShiftService{
     @Override
     @Transactional
     public ShiftResponseDto updateShift(UUID storeId, UUID id, ShiftUpdateRequestDto shiftUpdateRequestDto) {
-        if(!shiftUpdateRequestDto.storeId().equals(storeId)){
-            throw new IllegalArgumentException("Store id and Shift store id did not match");
-        }
         Store store = storeRepository
                 .findById(storeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Not found store with id " + storeId));
