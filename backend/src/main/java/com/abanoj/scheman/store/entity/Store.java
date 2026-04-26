@@ -5,6 +5,7 @@ import com.abanoj.scheman.shift.entity.Shift;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.BatchSize;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -27,7 +28,7 @@ public class Store extends BaseEntity {
     private Boolean is24h;
     private String phone;
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
-    @org.hibernate.annotations.BatchSize(size = 50)
+    @BatchSize(size = 20)
     @Builder.Default
     private Set<Shift> shifts = new HashSet<>();
 }

@@ -35,7 +35,9 @@ public class StoreServiceImpl implements StoreService{
     @Override
     @Transactional(readOnly = true)
     public StoreResponseDto findStoreById(UUID id) {
-        return storeMapper.toResponseDto(findStoreOrThrow(id));
+        Store store = storeRepository.findWithShiftsById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Store not found with id " + id));
+        return storeMapper.toResponseDto(store);
     }
 
     @Override
