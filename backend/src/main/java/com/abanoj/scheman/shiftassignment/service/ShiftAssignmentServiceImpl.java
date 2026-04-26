@@ -80,9 +80,6 @@ public class ShiftAssignmentServiceImpl implements ShiftAssignmentService{
     @Transactional
     public ShiftAssignmentResponseDto updateShiftAssignment(UUID shiftId, UUID id, ShiftAssignmentUpdateRequestDto shiftAssignmentUpdateRequestDto) {
         UUID employeeId = shiftAssignmentUpdateRequestDto.employeeId();
-        if(!shiftId.equals(shiftAssignmentUpdateRequestDto.shiftId())){
-            throw new IllegalArgumentException("Shift Id and Shift Assignment shift id did not match");
-        }
         Shift shift = shiftRepository
                 .findById(shiftId)
                 .orElseThrow(() -> new ResourceNotFoundException("Not found shift with id " + shiftId));
