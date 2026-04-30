@@ -1,8 +1,11 @@
 package com.abanoj.scheman.shift.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
 
+import java.time.DayOfWeek;
 import java.time.LocalTime;
+import java.util.Set;
 import java.util.UUID;
 
 public record ShiftResponseDto(
@@ -16,6 +19,8 @@ public record ShiftResponseDto(
         LocalTime startTime,
         @Schema(description = "Shift end time", example = "23:30:00")
         LocalTime endTime,
+        @Schema(description = "List of available days", example = "MONDAY, WEDNESDAY, FRIDAY")
+        Set<DayOfWeek> availableDays,
         @Schema(description = "Is shift crossing midnight?", example = "false")
         boolean crossesMidnight
 ) {

@@ -6,7 +6,10 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.time.DayOfWeek;
 import java.time.LocalTime;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.UUID;
 
 @Getter
@@ -26,6 +29,11 @@ public class Shift extends BaseEntity {
     private Store store;
     private LocalTime startTime;
     private LocalTime endTime;
+
+    @ElementCollection(fetch = FetchType.EAGER)
+    @CollectionTable(name = "shift_available_days", joinColumns = @JoinColumn(name = "shift_id"))
+    @Enumerated(EnumType.STRING)
+    private Set<DayOfWeek> availableDays = new HashSet<>();
 
     @Transient
     public boolean isCrossesMidnight() {
