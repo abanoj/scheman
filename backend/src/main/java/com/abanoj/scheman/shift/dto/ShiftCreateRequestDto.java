@@ -6,6 +6,7 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Set;
 
@@ -19,6 +20,9 @@ public record ShiftCreateRequestDto(
         @Schema(description = "Shift end time", example = "23:30:00")
         @NotNull(message = "There must be an end time")
         LocalTime endTime,
+        @Schema(description = "Effective from day", example = "2026-04-30")
+        @NotNull(message = "There must be an effective from day")
+        LocalDate effectiveFrom,
         @Schema(description = "List of available days", example = "MONDAY, WEDNESDAY, FRIDAY")
         @NotEmpty(message = "There must be at least one available day")
         Set<DayOfWeek> availableDays

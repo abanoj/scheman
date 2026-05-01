@@ -14,6 +14,7 @@ public interface ShiftMapper {
     ShiftResponseDto toResponseDto(Shift shift);
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "store", ignore = true)
+    @Mapping(target = "groupId", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     Shift toShift(ShiftCreateRequestDto shiftCreateRequestDto);

@@ -16,6 +16,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -31,7 +33,7 @@ public class ShiftServiceImpl implements ShiftService{
     @Transactional(readOnly = true)
     public Page<ShiftResponseDto> findAllShiftsByStoreId(Pageable pageable, UUID storeId) {
         return shiftRepository
-                .findAllByStoreId(pageable, storeId)
+                .findAllByStoreIdAndDeletedFalse(pageable, storeId)
                 .map(shiftMapper::toResponseDto);
     }
 
@@ -49,6 +51,7 @@ public class ShiftServiceImpl implements ShiftService{
                 .orElseThrow(() -> new ResourceNotFoundException("Not found store with id " + storeId));
         Shift shift = shiftMapper.toShift(shiftCreateRequestDto);
         shift.setStore(store);
+        shift.setGroupId(UUID.randomUUID());
         shiftRepository.save(shift);
         log.debug("Created Shift with id {}", shift.getId());
         return shiftMapper.toResponseDto(shift);
@@ -57,30 +60,38 @@ public class ShiftServiceImpl implements ShiftService{
     @Override
     @Transactional
     public ShiftResponseDto updateShift(UUID storeId, UUID id, ShiftUpdateRequestDto shiftUpdateRequestDto) {
-        Store store = storeRepository
-                .findById(storeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Not found store with id " + storeId));
         Shift shift = findShiftOrThrow(id, storeId);
-        shiftMapper.updateShiftFromDto(shiftUpdateRequestDto, shift);
-        shift.setStore(store);
-        shiftRepository.save(shift);
-        log.debug("Updated Shift with id {}", shift.getId());
-        return shiftMapper.toResponseDto(shift);
+        shift.setEffectiveTo(LocalDate.now().minusDays(1));
+        shift.setDeleted(true);
+
+        Shift newShift = Shift.builder()
+                .name(shiftUpdateRequestDto.name())
+                .store(shift.getStore())
+                .startTime(shiftUpdateRequestDto.startTime())
+                .endTime(shiftUpdateRequestDto.endTime())
+                .availableDays(shiftUpdateRequestDto.availableDays())
+                .groupId(shift.getGroupId())
+                .effectiveFrom(LocalDate.now())
+                .build();
+
+        shiftRepository.saveAll(List.of(shift, newShift));
+        log.debug("Updated Shift group with id {}", shift.getGroupId());
+        return shiftMapper.toResponseDto(newShift);
     }
 
     @Override
     @Transactional
     public void deleteShift(UUID storeId, UUID id) {
-        if(!shiftRepository.existsByIdAndStoreId(id, storeId)){
-            throw new ResourceNotFoundException("Not found shift with id " + id);
-        }
-        shiftRepository.deleteById(id);
+        Shift shift = findShiftOrThrow(id, storeId);
+        shift.setEffectiveTo(LocalDate.now().minusDays(1));
+        shift.setDeleted(true);
+        shiftRepository.save(shift);
         log.debug("Shift {} deleted", id);
     }
 
     private Shift findShiftOrThrow(UUID id, UUID storeId){
         return shiftRepository
-                .findByIdAndStoreId(id, storeId)
+                .findByIdAndStoreIdAndDeletedFalse(id, storeId)
                 .orElseThrow(() -> new ResourceNotFoundException("Not found shift with id " + id));
     }
 }
