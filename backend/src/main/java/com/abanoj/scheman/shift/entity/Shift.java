@@ -44,6 +44,9 @@ public class Shift extends BaseEntity {
     @Builder.Default
     private boolean deleted = false;
 
+    @Enumerated(EnumType.STRING)
+    private ShiftType shiftType;
+
     @Transient
     public boolean isCrossesMidnight() {
         return startTime != null && endTime != null && startTime.isAfter(endTime);

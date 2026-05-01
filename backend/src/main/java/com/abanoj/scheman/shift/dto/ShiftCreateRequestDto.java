@@ -1,5 +1,6 @@
 package com.abanoj.scheman.shift.dto;
 
+import com.abanoj.scheman.shift.entity.ShiftType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
@@ -23,6 +24,9 @@ public record ShiftCreateRequestDto(
         @Schema(description = "Effective from day", example = "2026-04-30")
         @NotNull(message = "There must be an effective from day")
         LocalDate effectiveFrom,
+        @Schema(description = "Type of shift", example = "MORNING, AFTERNOON or NIGHT")
+        @NotNull(message = "There must be an shift type")
+        ShiftType shiftType,
         @Schema(description = "List of available days", example = "MONDAY, WEDNESDAY, FRIDAY")
         @NotEmpty(message = "There must be at least one available day")
         Set<DayOfWeek> availableDays
