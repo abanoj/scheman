@@ -1,7 +1,9 @@
 package com.abanoj.scheman.employee.dto;
 
+import com.abanoj.scheman.shift.entity.ShiftType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.Size;
 
@@ -18,6 +20,9 @@ public record EmployeeUpdateRequestDto(
         @Schema(description = "Email address", example = "john@doe.com")
         @Email(message = "Invalid email format")
         String email,
+        @Schema(description = "Preferred shift", example = "MORNING, AFTERNOON or NIGHT")
+        @NotBlank(message = "Preferred shift is required")
+        ShiftType preferredShift,
         @Schema(description = "Weekly contracted hours", example = "40")
         @Positive(message = "Weekly contracted hours must be positive")
         Integer weeklyContractedHours

@@ -1,6 +1,8 @@
 package com.abanoj.scheman.employee.dto;
 
+import com.abanoj.scheman.shift.entity.ShiftType;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotBlank;
 
 import java.util.UUID;
 
@@ -17,6 +19,8 @@ public record EmployeeResponseDto(
         String email,
         @Schema(description = "Employee ID", example = "f47ac10b-58cc-4372-a567-0e02b2c3d479")
         UUID userId,
+        @Schema(description = "Preferred shift", example = "MORNING, AFTERNOON or NIGHT")
+        ShiftType preferredShift,
         @Schema(description = "Weekly contracted hours", example = "40")
         Integer weeklyContractedHours
 ) {

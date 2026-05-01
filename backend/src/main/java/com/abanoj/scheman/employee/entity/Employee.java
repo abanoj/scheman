@@ -2,6 +2,7 @@ package com.abanoj.scheman.employee.entity;
 
 import com.abanoj.scheman.auth.entity.User;
 import com.abanoj.scheman.shared.BaseEntity;
+import com.abanoj.scheman.shift.entity.ShiftType;
 import com.abanoj.scheman.shiftassignment.entity.ShiftAssignment;
 import jakarta.persistence.*;
 import lombok.*;
@@ -31,4 +32,7 @@ public class Employee extends BaseEntity {
     @Builder.Default
     private Set<ShiftAssignment> shiftAssignments = new HashSet<>();
     private Integer weeklyContractedHours;
+    @Enumerated(EnumType.STRING)
+    private ShiftType preferredShift;
+
 }
