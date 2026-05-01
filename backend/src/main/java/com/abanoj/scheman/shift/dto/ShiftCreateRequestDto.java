@@ -2,6 +2,7 @@ package com.abanoj.scheman.shift.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
 import java.time.DayOfWeek;
@@ -19,7 +20,7 @@ public record ShiftCreateRequestDto(
         @NotNull(message = "There must be an end time")
         LocalTime endTime,
         @Schema(description = "List of available days", example = "MONDAY, WEDNESDAY, FRIDAY")
-        @NotNull(message = "There must be at least one available day")
+        @NotEmpty(message = "There must be at least one available day")
         Set<DayOfWeek> availableDays
 ) {
 }
