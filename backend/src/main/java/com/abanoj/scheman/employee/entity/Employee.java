@@ -38,7 +38,8 @@ public class Employee extends BaseEntity {
             joinColumns = @JoinColumn(name = "employee_id"),
             inverseJoinColumns = @JoinColumn(name = "store_id")
     )
-    List<Store> preferredStores = new ArrayList<>();
+    @Builder.Default
+    private List<Store> preferredStores = new ArrayList<>();
     private Integer weeklyContractedHours;
 
     public void addStore(Store store){
