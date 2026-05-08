@@ -2,10 +2,7 @@ package com.abanoj.scheman.employee.dto;
 
 import com.abanoj.scheman.shift.entity.ShiftType;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Email;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Positive;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 import java.util.List;
 import java.util.UUID;
@@ -28,7 +25,7 @@ public record EmployeeCreateRequestDto(
         @Email(message = "Invalid email format")
         String email,
         @Schema(description = "Preferred shift", example = "MORNING, AFTERNOON or NIGHT")
-        @NotBlank(message = "Preferred shift is required")
+        @NotNull(message = "Preferred shift is required")
         ShiftType preferredShift,
         @Schema(description = "Preferred stores ids", example = "f47ac10b-58cc-4372-a567-0e02b2c3d479,...")
         List<UUID> preferredStoresIDs,

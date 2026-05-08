@@ -11,6 +11,8 @@ import com.abanoj.scheman.employee.mapper.EmployeeMapper;
 import com.abanoj.scheman.employee.repository.EmployeeRepository;
 import com.abanoj.scheman.exception.ConflictException;
 import com.abanoj.scheman.exception.ResourceNotFoundException;
+import com.abanoj.scheman.store.entity.Store;
+import com.abanoj.scheman.store.repository.StoreRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -19,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -30,6 +33,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     private final PasswordEncoder passwordEncoder;
     private final EmployeeMapper employeeMapper;
     private final EmployeeRepository employeeRepository;
+    private final StoreRepository storeRepository;
 
     @Override
     @Transactional(readOnly = true)
@@ -60,10 +64,18 @@ public class EmployeeServiceImpl implements EmployeeService {
         Employee employee = Employee.builder()
                 .user(user)
                 .dni(request.dni())
+                .preferredShift(request.preferredShift())
                 .weeklyContractedHours(request.weeklyContractedHours())
                 .build();
 
         employeeRepository.save(employee);
+
+        if (request.preferredStoresIDs() != null && !request.preferredStoresIDs().isEmpty()) {
+            List<Store> stores = storeRepository.findAllById(request.preferredStoresIDs());
+            stores.forEach(employee::addStore);
+            employeeRepository.save(employee);
+        }
+
         log.info("New employee created: {} {}", request.firstName(), request.lastName());
         return employeeMapper.toResponseUserEmployeeDto(employee, user);
     }
@@ -77,6 +89,15 @@ public class EmployeeServiceImpl implements EmployeeService {
         User user = employee.getUser();
         employeeMapper.updateUserFromDto(employeeUpdateRequestDto, user);
         employeeMapper.updateEmployeeFromDto(employeeUpdateRequestDto, employee);
+
+        if (employeeUpdateRequestDto.preferredStoresIds() != null) {
+            List<Store> currentStores = employee.getPreferredStores();
+            currentStores.forEach(employee::removeStore);
+
+            List<Store> newStores = storeRepository.findAllById(employeeUpdateRequestDto.preferredStoresIds());
+            newStores.forEach(employee::addStore);
+        }
+
         userRepository.save(user);
         employeeRepository.save(employee);
         log.debug("Updated employee with id {}", employeeId);

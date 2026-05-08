@@ -14,9 +14,9 @@ import java.util.UUID;
 public interface EmployeeRepository extends JpaRepository<Employee, UUID> {
 
     @Override
-    @EntityGraph(attributePaths = {"user"})
+    @EntityGraph(attributePaths = {"user", "preferredStores"})
     Page<Employee> findAll(@NonNull Pageable pageable);
 
-    @Query("SELECT e FROM Employee e JOIN FETCH e.user WHERE e.id = :id")
+    @Query("SELECT e FROM Employee e JOIN FETCH e.user LEFT JOIN FETCH e.preferredStores WHERE e.id = :id")
     Optional<Employee> findByIdWithUser(UUID id);
 }
