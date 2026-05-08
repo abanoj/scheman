@@ -1,9 +1,10 @@
 package com.abanoj.scheman.employee.dto;
 
 import com.abanoj.scheman.shift.entity.ShiftType;
+import com.abanoj.scheman.store.dto.StoreSummaryResponseDto;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
 
+import java.util.List;
 import java.util.UUID;
 
 public record EmployeeResponseDto(
@@ -21,6 +22,8 @@ public record EmployeeResponseDto(
         UUID userId,
         @Schema(description = "Preferred shift", example = "MORNING, AFTERNOON or NIGHT")
         ShiftType preferredShift,
+        @Schema(description = "Preferred stores", example = "SAN BLAS, TOROS,...")
+        List<StoreSummaryResponseDto> preferredStores,
         @Schema(description = "Weekly contracted hours", example = "40")
         Integer weeklyContractedHours
 ) {
