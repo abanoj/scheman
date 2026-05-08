@@ -14,6 +14,6 @@ public interface StoreRepository extends JpaRepository<Store, UUID> {
     @Override
     Page<Store> findAll(@NonNull Pageable pageable);
 
-    @EntityGraph(attributePaths = {"shifts"})
+    @EntityGraph(attributePaths = {"shifts", "preferredEmployees", "preferredEmployees.user"})
     Optional<Store> findWithShiftsById(UUID id);
 }

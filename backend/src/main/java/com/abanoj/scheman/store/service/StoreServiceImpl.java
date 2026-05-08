@@ -52,7 +52,8 @@ public class StoreServiceImpl implements StoreService{
     @Override
     @Transactional
     public StoreResponseDto updateStore(UUID id, StoreUpdateRequestDto storeUpdateRequestDto) {
-        Store store = findStoreOrThrow(id);
+        Store store = storeRepository.findWithShiftsById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Store not found with id " + id));
         storeMapper.updateStoreFromDto(storeUpdateRequestDto, store);
         storeRepository.save(store);
         log.debug("Updated store with id {}", store.getId());
@@ -69,12 +70,5 @@ public class StoreServiceImpl implements StoreService{
         storeRepository.deleteById(id);
         log.debug("Store {} deleted", id);
     }
-
-    private Store findStoreOrThrow(UUID id){
-        return storeRepository
-                .findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Store not found with id " + id));
-    }
-
 }
 

@@ -31,6 +31,7 @@ public class Store extends BaseEntity {
     @Builder.Default
     private Set<Shift> shifts = new HashSet<>();
     @ManyToMany(mappedBy = "preferredStores")
+    @BatchSize(size = 20)
     @Builder.Default
     private List<Employee> preferredEmployees = new ArrayList<>();
 }
