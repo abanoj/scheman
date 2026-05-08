@@ -31,7 +31,6 @@ public record EmployeeCreateRequestDto(
         @NotBlank(message = "Preferred shift is required")
         ShiftType preferredShift,
         @Schema(description = "Preferred stores ids", example = "f47ac10b-58cc-4372-a567-0e02b2c3d479,...")
-        @NotBlank(message = "Preferred stores is required")
         List<UUID> preferredStoresIDs,
         @Schema(description = "Weekly contracted hours", example = "40")
         @Positive(message = "Weekly contracted hours must be positive")
