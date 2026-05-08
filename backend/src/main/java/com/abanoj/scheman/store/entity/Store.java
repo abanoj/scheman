@@ -1,5 +1,6 @@
 package com.abanoj.scheman.store.entity;
 
+import com.abanoj.scheman.employee.entity.Employee;
 import com.abanoj.scheman.shared.BaseEntity;
 import com.abanoj.scheman.shift.entity.Shift;
 import jakarta.persistence.*;
@@ -7,9 +8,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.BatchSize;
 
-import java.util.HashSet;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 @Getter
 @Setter
@@ -31,4 +30,7 @@ public class Store extends BaseEntity {
     @BatchSize(size = 20)
     @Builder.Default
     private Set<Shift> shifts = new HashSet<>();
+    @ManyToMany(mappedBy = "preferredStores")
+    @Builder.Default
+    private List<Employee> preferredEmployees = new ArrayList<>();
 }

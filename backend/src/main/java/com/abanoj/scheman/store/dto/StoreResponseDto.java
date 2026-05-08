@@ -1,8 +1,10 @@
 package com.abanoj.scheman.store.dto;
 
+import com.abanoj.scheman.employee.dto.EmployeeSummaryResponseDto;
 import com.abanoj.scheman.shift.dto.ShiftResponseDto;
 import io.swagger.v3.oas.annotations.media.Schema;
 
+import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 
@@ -18,6 +20,8 @@ public record StoreResponseDto(
         @Schema(description = "Is the store open 24 hours?", example = "true")
         Boolean is24h,
         @Schema(description = "Set of shifts available", example = "...")
-        Set<ShiftResponseDto> shifts
+        Set<ShiftResponseDto> shifts,
+        @Schema(description = "List of preferred employees")
+        List<EmployeeSummaryResponseDto> preferredEmployees
 ) {
 }
