@@ -19,6 +19,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -100,6 +101,22 @@ public class ShiftAssignmentServiceImpl implements ShiftAssignmentService{
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public List<ShiftAssignmentResponseDto> findWeeklyAssignmentsByEmployee(UUID employeeId, LocalDate date){
+        employeeRepository
+                .findById(employeeId)
+                .orElseThrow(() -> new ResourceNotFoundException("Not found employee with id " + employeeId));
+        LocalDate monday = date.with(DayOfWeek.MONDAY);
+        LocalDate sunday = date.with(DayOfWeek.SUNDAY);
+
+        return shiftAssignmentRepository
+                .findByEmployeeIdAndDateBetween(employeeId, monday, sunday)
+                .stream()
+                .map(shiftAssignmentMapper::toResponseDto)
+                .toList();
+    }
+
+    @Override
     @Transactional
     public void delete(UUID shiftId, UUID id) {
         if(!shiftAssignmentRepository.existsByIdAndShiftId(id, shiftId)){
@@ -110,10 +127,8 @@ public class ShiftAssignmentServiceImpl implements ShiftAssignmentService{
     }
 
     private void validateNoOverlap(UUID employeeId, LocalDate date, Shift newShift, UUID excludeAssignmentId) {
-        List<LocalDate> datesToCheck = List.of(date, date.minusDays(1));
-
         List<ShiftAssignment> existing = shiftAssignmentRepository
-                .findByEmployeeIdAndDateIn(employeeId, datesToCheck);
+                .findByEmployeeIdAndDateBetween(employeeId, date.minusDays(1), date);
 
         for (ShiftAssignment assignment : existing) {
             if (excludeAssignmentId != null && excludeAssignmentId.equals(assignment.getId())) {
