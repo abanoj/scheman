@@ -30,4 +30,12 @@ public interface ShiftAssignmentRepository extends JpaRepository<ShiftAssignment
             ORDER BY sa.date ASC, s.startTime ASC
             """)
     List<ShiftAssignment> findByEmployeeIdAndDateBetween(UUID employeeId, LocalDate startDate, LocalDate endDate);
+
+    @Query("""
+           SELECT sa FROM ShiftAssignment sa
+           JOIN FETCH sa.shift s
+           WHERE s.id IN :shiftIds
+           AND sa.date BETWEEN :startDate AND :endDate
+           """)
+    List<ShiftAssignment> findByShiftIdInAndDateBetween(List<UUID> shiftIds, LocalDate startDate, LocalDate endDate);
 }

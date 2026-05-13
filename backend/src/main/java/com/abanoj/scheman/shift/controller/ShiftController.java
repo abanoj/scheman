@@ -4,6 +4,7 @@ import com.abanoj.scheman.exception.ErrorResponse;
 import com.abanoj.scheman.shift.dto.ShiftCreateRequestDto;
 import com.abanoj.scheman.shift.dto.ShiftResponseDto;
 import com.abanoj.scheman.shift.dto.ShiftUpdateRequestDto;
+import com.abanoj.scheman.shift.dto.UnassignedShiftResponseDto;
 import com.abanoj.scheman.shift.service.ShiftService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -22,6 +23,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.UUID;
 
 @RestController
@@ -44,6 +47,21 @@ public class ShiftController {
             @PageableDefault(size = 10, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable,
             @Parameter(description = "Store ID") @PathVariable UUID storeId) {
         return ResponseEntity.ok(shiftService.findAllShiftsByStoreId(pageable, storeId));
+    }
+
+    @GetMapping("/unassigned")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @Operation(summary = "Get unassigned shifts for a store in a given week", responses = {
+            @ApiResponse(responseCode = "200", description = "Unassigned shifts retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Not authenticated",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public ResponseEntity<List<UnassignedShiftResponseDto>> getUnassignedShifts(
+            @Parameter(description = "Store ID") @PathVariable UUID storeId,
+            @Parameter(description = "Any date within the target week") @RequestParam LocalDate date) {
+        return ResponseEntity.ok(shiftService.findUnassignedShifts(storeId, date));
     }
 
     @GetMapping("/{id}")

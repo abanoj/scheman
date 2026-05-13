@@ -4,9 +4,11 @@ import com.abanoj.scheman.exception.ResourceNotFoundException;
 import com.abanoj.scheman.shift.dto.ShiftCreateRequestDto;
 import com.abanoj.scheman.shift.dto.ShiftResponseDto;
 import com.abanoj.scheman.shift.dto.ShiftUpdateRequestDto;
+import com.abanoj.scheman.shift.dto.UnassignedShiftResponseDto;
 import com.abanoj.scheman.shift.entity.Shift;
 import com.abanoj.scheman.shift.mapper.ShiftMapper;
 import com.abanoj.scheman.shift.repository.ShiftRepository;
+import com.abanoj.scheman.shiftassignment.repository.ShiftAssignmentRepository;
 import com.abanoj.scheman.store.entity.Store;
 import com.abanoj.scheman.store.repository.StoreRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,9 +18,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -27,6 +30,7 @@ public class ShiftServiceImpl implements ShiftService{
 
     private final ShiftRepository shiftRepository;
     private final StoreRepository storeRepository;
+    private final ShiftAssignmentRepository shiftAssignmentRepository;
     private final ShiftMapper shiftMapper;
 
     @Override
@@ -77,6 +81,44 @@ public class ShiftServiceImpl implements ShiftService{
         shiftRepository.saveAll(List.of(shift, newShift));
         log.debug("Updated Shift group with id {}", shift.getGroupId());
         return shiftMapper.toResponseDto(newShift);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<UnassignedShiftResponseDto> findUnassignedShifts(UUID storeId, LocalDate date) {
+        LocalDate monday = date.with(DayOfWeek.MONDAY);
+        LocalDate sunday = date.with(DayOfWeek.SUNDAY);
+
+        List<Shift> activeShifts = shiftRepository.findActiveShiftsByStoreIdAndDateRange(storeId, monday, sunday);
+
+        if (activeShifts.isEmpty()) {
+            return List.of();
+        }
+
+        List<UUID> activeShiftIds = activeShifts.stream().map(Shift::getId).toList();
+        Set<String> assignedKeys = shiftAssignmentRepository
+                .findByShiftIdInAndDateBetween(activeShiftIds, monday, sunday)
+                .stream()
+                .map(sa -> sa.getShift().getId() + ":" + sa.getDate())
+                .collect(Collectors.toSet());
+
+        List<UnassignedShiftResponseDto> unassignedShift = new ArrayList<>();
+        for (Shift shift : activeShifts) {
+            Set<DayOfWeek> unassignedDays = new HashSet<>();
+            for (LocalDate currentDate = monday; !currentDate.isAfter(sunday); currentDate = currentDate.plusDays(1)) {
+                if (!shift.getAvailableDays().contains(currentDate.getDayOfWeek())) continue;
+                if (currentDate.isBefore(shift.getEffectiveFrom())) continue;
+                if (shift.getEffectiveTo() != null && currentDate.isAfter(shift.getEffectiveTo())) continue;
+                String key = shift.getId() + ":" + currentDate;
+                if (!assignedKeys.contains(key)) {
+                    unassignedDays.add(currentDate.getDayOfWeek());
+                }
+            }
+            if(!unassignedDays.isEmpty()){
+                unassignedShift.add(new UnassignedShiftResponseDto(shift.getId(), shift.getName(), unassignedDays));
+            }
+        }
+        return unassignedShift;
     }
 
     @Override
