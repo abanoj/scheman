@@ -6,10 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.time.DayOfWeek;
-import java.time.Instant;
-import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.*;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
@@ -29,7 +26,9 @@ public class Shift extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "store_id")
     private Store store;
+    @Column(nullable = false)
     private LocalTime startTime;
+    @Column(nullable = false)
     private LocalTime endTime;
 
     @ElementCollection(fetch = FetchType.EAGER)
@@ -49,6 +48,15 @@ public class Shift extends BaseEntity {
 
     @Transient
     public boolean isCrossesMidnight() {
-        return startTime != null && endTime != null && startTime.isAfter(endTime);
+        return startTime.isAfter(endTime);
+    }
+
+    @Transient
+    public double getTotalHours(){
+        Duration duration = Duration.between(startTime, endTime);
+        if(duration.isNegative()){
+            duration = duration.plusDays(1);
+        }
+        return duration.toMinutes() / 60.0;
     }
 }
