@@ -1,0 +1,24 @@
+spring:
+  datasource:
+    url: jdbc:h2m:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
+
+application:
+  security:
+    jwt:
+      secret-key: TG7xWzT4W2b8gHvSZ02kinMvjYV4N69XLiVfkVeqG67
+      expiration: 900000
+      refresh:
+        expiration: 604800000
+  admin:
+    email: admin@abanoj.com
+    password: admin
+
