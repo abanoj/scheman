@@ -17,7 +17,7 @@ import java.util.UUID;
 @SuperBuilder
 @Entity
 @Table(name = "shift_assignments", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"employee_id", "shift_id", "date"})
+        @UniqueConstraint(columnNames = {"employee_id", "date"})
 })
 public class ShiftAssignment extends BaseEntity {
     @Id
