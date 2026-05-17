@@ -1,7 +1,6 @@
 package com.abanoj.scheman.store.repository;
 
 import com.abanoj.scheman.store.entity.Store;
-import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
@@ -11,9 +10,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface StoreRepository extends JpaRepository<Store, UUID> {
-    @Override
-    Page<Store> findAll(@NonNull Pageable pageable);
+    Page<Store> findAllByDeletedFalse(Pageable pageable);
+
+    Optional<Store> findByIdAndDeletedFalse(UUID id);
 
     @EntityGraph(attributePaths = {"shifts", "preferredEmployees", "preferredEmployees.user"})
-    Optional<Store> findWithShiftsById(UUID id);
+    Optional<Store> findWithShiftsByIdAndDeletedFalse(UUID id);
 }

@@ -27,7 +27,9 @@ public class Store extends BaseEntity {
     private String address;
     private Boolean is24h;
     private String phone;
-    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private boolean deleted = false;
+    @OneToMany(mappedBy = "store", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @BatchSize(size = 20)
     @SQLRestriction("deleted = false")
     @Builder.Default

@@ -29,14 +29,14 @@ public class StoreServiceImpl implements StoreService{
     @Transactional(readOnly = true)
     public Page<StoreListResponseDto> findAllStores(Pageable pageable) {
         return storeRepository
-                .findAll(pageable)
+                .findAllByDeletedFalse(pageable)
                 .map(storeMapper::toListResponseDto);
     }
 
     @Override
     @Transactional(readOnly = true)
     public StoreResponseDto findStoreById(UUID id) {
-        Store store = storeRepository.findWithShiftsById(id)
+        Store store = storeRepository.findWithShiftsByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Store not found with id " + id));
         return storeMapper.toResponseDto(store);
     }
@@ -53,7 +53,7 @@ public class StoreServiceImpl implements StoreService{
     @Override
     @Transactional
     public StoreResponseDto updateStore(UUID id, StoreUpdateRequestDto storeUpdateRequestDto) {
-        Store store = storeRepository.findWithShiftsById(id)
+        Store store = storeRepository.findWithShiftsByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Store not found with id " + id));
         storeMapper.updateStoreFromDto(storeUpdateRequestDto, store);
         storeRepository.save(store);
@@ -64,12 +64,12 @@ public class StoreServiceImpl implements StoreService{
     @Override
     @Transactional
     public void deleteStore(UUID id) {
-        if(!storeRepository.existsById(id)){
-            throw new ResourceNotFoundException("Store not found with id " + id);
-        }
+        Store store = storeRepository.findByIdAndDeletedFalse(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Store not found with id " + id));
 
-        storeRepository.deleteById(id);
-        log.debug("Store {} deleted", id);
+        store.setDeleted(true);
+        storeRepository.save(store);
+        log.debug("Store {} soft-deleted", id);
     }
 }
 
