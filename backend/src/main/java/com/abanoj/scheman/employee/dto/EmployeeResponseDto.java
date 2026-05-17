@@ -18,7 +18,7 @@ public record EmployeeResponseDto(
         String lastName,
         @Schema(description = "Email address", example = "john@doe.com")
         String email,
-        @Schema(description = "Employee ID", example = "f47ac10b-58cc-4372-a567-0e02b2c3d479")
+        @Schema(description = "User ID", example = "f47ac10b-58cc-4372-a567-0e02b2c3d479")
         UUID userId,
         @Schema(description = "Preferred shift", example = "MORNING, AFTERNOON or NIGHT")
         ShiftType preferredShift,
