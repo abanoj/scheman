@@ -2,7 +2,7 @@ package com.abanoj.scheman.auth.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.Pattern;
 
 public record ManagerCreateRequestDto(
         @NotBlank(message = "First name is required")
@@ -13,7 +13,10 @@ public record ManagerCreateRequestDto(
         @Email(message = "Invalid email format")
         String email,
         @NotBlank(message = "Password is required")
-        @Size(min = 8, message = "Password must be at least 8 characters")
+        @Pattern(
+                regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z\\d]).{8,}$",
+                message = "Password must be at least 8 characters and contain one uppercase, one lowercase, one digit and one special character"
+        )
         String password
 ) {
 }
