@@ -27,7 +27,7 @@ public class Employee extends BaseEntity {
     @MapsId
     @JoinColumn(name = "user_id")
     private User user;
-    @OneToMany(mappedBy = "employee", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "employee", cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @Builder.Default
     private Set<ShiftAssignment> shiftAssignments = new HashSet<>();
     @Enumerated(EnumType.STRING)
