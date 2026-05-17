@@ -1,12 +1,10 @@
 package com.abanoj.scheman.store.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 
 public record StoreUpdateRequestDto(
         @Schema(description = "Store title", example = "San Blas")
-        @NotBlank(message = "There must be a store name")
         String name,
         @Schema(description = "Store address", example = "Plaza General Mancha, N2")
         String address,

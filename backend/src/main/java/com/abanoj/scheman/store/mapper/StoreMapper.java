@@ -25,6 +25,7 @@ public interface StoreMapper {
 
     StoreSummaryResponseDto toStoreSummaryDto(Store store);
 
+    @BeanMapping(nullValuePropertyMappingStrategy = NullValuePropertyMappingStrategy.IGNORE)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "shifts", ignore = true)
     @Mapping(target = "preferredEmployees", ignore = true)

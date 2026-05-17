@@ -78,9 +78,9 @@ public class StoreController {
         return ResponseEntity.status(HttpStatus.CREATED).body(storeService.createStore(storeCreateRequestDto));
     }
 
-    @PutMapping("/{id}")
+    @PatchMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
-    @Operation(summary = "Update an existing Store", responses = {
+    @Operation(summary = "Partially update an existing Store", responses = {
             @ApiResponse(responseCode = "200", description = "Store updated successfully"),
             @ApiResponse(responseCode = "400", description = "Invalid request body",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
