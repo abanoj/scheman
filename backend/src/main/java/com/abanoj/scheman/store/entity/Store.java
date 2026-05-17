@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.BatchSize;
+import org.hibernate.annotations.SQLRestriction;
 
 import java.util.*;
 
@@ -28,10 +29,11 @@ public class Store extends BaseEntity {
     private String phone;
     @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
     @BatchSize(size = 20)
+    @SQLRestriction("deleted = false")
     @Builder.Default
     private Set<Shift> shifts = new HashSet<>();
     @ManyToMany(mappedBy = "preferredStores")
     @BatchSize(size = 20)
     @Builder.Default
-    private List<Employee> preferredEmployees = new ArrayList<>();
+    private Set<Employee> preferredEmployees = new HashSet<>();
 }
