@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Instant;
-import java.util.Objects;
 import java.util.UUID;
 
 @Service
@@ -88,13 +87,14 @@ public class AuthServiceImpl implements AuthService {
                 .findById(id)
                 .orElseThrow(()-> new ResourceNotFoundException("Not found user with id " + id));
 
+        if(!passwordEncoder.matches(request.oldPassword(), user.getPassword())){
+            throw new AuthenticationFailedException("Invalid password");
+        }
+
         if(passwordEncoder.matches(request.newPassword(), user.getPassword())){
             throw new IllegalArgumentException("New password must be different");
         }
 
-        if(!passwordEncoder.matches(request.oldPassword(), user.getPassword())){
-            throw new AuthenticationFailedException("Invalid password");
-        }
         user.setPassword(passwordEncoder.encode(request.newPassword()));
         userRepository.save(user);
         log.debug("Password change successfully for: {}", user.getEmail());
