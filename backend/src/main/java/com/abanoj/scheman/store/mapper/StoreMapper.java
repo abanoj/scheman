@@ -3,6 +3,7 @@ package com.abanoj.scheman.store.mapper;
 import com.abanoj.scheman.employee.mapper.EmployeeMapper;
 import com.abanoj.scheman.shift.mapper.ShiftMapper;
 import com.abanoj.scheman.store.dto.StoreCreateRequestDto;
+import com.abanoj.scheman.store.dto.StoreListResponseDto;
 import com.abanoj.scheman.store.dto.StoreResponseDto;
 import com.abanoj.scheman.store.dto.StoreSummaryResponseDto;
 import com.abanoj.scheman.store.dto.StoreUpdateRequestDto;
@@ -19,6 +20,8 @@ public interface StoreMapper {
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "updatedAt", ignore = true)
     Store toStore(StoreCreateRequestDto storeCreateRequestDto);
+
+    StoreListResponseDto toListResponseDto(Store store);
 
     StoreSummaryResponseDto toStoreSummaryDto(Store store);
 

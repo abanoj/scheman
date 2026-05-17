@@ -2,6 +2,7 @@ package com.abanoj.scheman.store.controller;
 
 import com.abanoj.scheman.exception.ErrorResponse;
 import com.abanoj.scheman.store.dto.StoreCreateRequestDto;
+import com.abanoj.scheman.store.dto.StoreListResponseDto;
 import com.abanoj.scheman.store.dto.StoreResponseDto;
 import com.abanoj.scheman.store.dto.StoreUpdateRequestDto;
 import com.abanoj.scheman.store.service.StoreService;
@@ -40,7 +41,7 @@ public class StoreController {
             @ApiResponse(responseCode = "403", description = "Insufficient permissions",
                     content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
     })
-    public ResponseEntity<Page<StoreResponseDto>> getAllStores(
+    public ResponseEntity<Page<StoreListResponseDto>> getAllStores(
             @PageableDefault(size = 10, sort = "updatedAt", direction = Sort.Direction.DESC) Pageable pageable){
         return ResponseEntity.ok(storeService.findAllStores(pageable));
     }

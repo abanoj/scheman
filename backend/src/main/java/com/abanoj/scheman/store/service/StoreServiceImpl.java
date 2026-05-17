@@ -2,6 +2,7 @@ package com.abanoj.scheman.store.service;
 
 import com.abanoj.scheman.exception.ResourceNotFoundException;
 import com.abanoj.scheman.store.dto.StoreCreateRequestDto;
+import com.abanoj.scheman.store.dto.StoreListResponseDto;
 import com.abanoj.scheman.store.dto.StoreResponseDto;
 import com.abanoj.scheman.store.dto.StoreUpdateRequestDto;
 import com.abanoj.scheman.store.entity.Store;
@@ -26,10 +27,10 @@ public class StoreServiceImpl implements StoreService{
 
     @Override
     @Transactional(readOnly = true)
-    public Page<StoreResponseDto> findAllStores(Pageable pageable) {
+    public Page<StoreListResponseDto> findAllStores(Pageable pageable) {
         return storeRepository
                 .findAll(pageable)
-                .map(storeMapper::toResponseDto);
+                .map(storeMapper::toListResponseDto);
     }
 
     @Override
