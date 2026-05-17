@@ -96,6 +96,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         user.setPassword(passwordEncoder.encode(request.newPassword()));
+        user.setMustChangePassword(false);
         userRepository.save(user);
         log.debug("Password change successfully for: {}", user.getEmail());
     }
@@ -147,6 +148,6 @@ public class AuthServiceImpl implements AuthService {
 
         refreshTokenRepository.save(refreshToken);
 
-        return new AuthResponseDto(accessToken, refreshTokenStr);
+        return new AuthResponseDto(accessToken, refreshTokenStr, user.isMustChangePassword());
     }
 }

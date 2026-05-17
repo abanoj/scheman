@@ -57,6 +57,7 @@ public class EmployeeServiceImpl implements EmployeeService {
                 .password(passwordEncoder.encode(request.dni()))
                 .role(Role.EMPLOYEE)
                 .enabled(true)
+                .mustChangePassword(true)
                 .build();
 
         userRepository.save(user);
