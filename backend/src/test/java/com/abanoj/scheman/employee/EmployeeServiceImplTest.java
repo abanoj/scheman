@@ -5,11 +5,14 @@ import com.abanoj.scheman.auth.entity.User;
 import com.abanoj.scheman.auth.repository.UserRepository;
 import com.abanoj.scheman.employee.dto.EmployeeCreateRequestDto;
 import com.abanoj.scheman.employee.dto.EmployeeResponseDto;
+import com.abanoj.scheman.employee.dto.EmployeeUpdateRequestDto;
 import com.abanoj.scheman.employee.entity.Employee;
 import com.abanoj.scheman.employee.mapper.EmployeeMapper;
 import com.abanoj.scheman.employee.repository.EmployeeRepository;
 import com.abanoj.scheman.employee.service.EmployeeServiceImpl;
 import com.abanoj.scheman.exception.ConflictException;
+import com.abanoj.scheman.exception.ResourceNotFoundException;
+import com.abanoj.scheman.shift.entity.ShiftType;
 import com.abanoj.scheman.store.entity.Store;
 import com.abanoj.scheman.store.repository.StoreRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,6 +30,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Stream;
 
@@ -34,8 +38,7 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.*;
+import static org.mockito.BDDMockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class EmployeeServiceImplTest {
@@ -83,6 +86,7 @@ public class EmployeeServiceImplTest {
                 .id(employeeId)
                 .dni("Y9107721J")
                 .user(user)
+                .preferredShift(ShiftType.NIGHT)
                 .weeklyContractedHours(40)
                 .build();
 
@@ -204,12 +208,101 @@ public class EmployeeServiceImplTest {
     @DisplayName("updateEmployee")
     class UpdateEmployee{
 
+        private EmployeeUpdateRequestDto employeeUpdateRequestDto;
+        private EmployeeUpdateRequestDto employeeUpdateWithoutStoresDto;
+        private EmployeeResponseDto employeeResponseUpdated;
+
+        @BeforeEach
+        void setUp(){
+            employeeUpdateRequestDto = new EmployeeUpdateRequestDto(
+                    employee.getDni(),
+                    employee.getUser().getFirstName(),
+                    employee.getUser().getLastName(),
+                    employee.getUser().getEmail(),
+                    ShiftType.AFTERNOON,
+                    List.of(store.getId()),
+                    employee.getWeeklyContractedHours()
+            );
+            employeeUpdateWithoutStoresDto = new EmployeeUpdateRequestDto(
+                    employee.getDni(),
+                    employee.getUser().getFirstName(),
+                    employee.getUser().getLastName(),
+                    employee.getUser().getEmail(),
+                    ShiftType.AFTERNOON,
+                    null,
+                    employee.getWeeklyContractedHours()
+            );
+            employeeResponseUpdated = new EmployeeResponseDto(
+                    employeeId,
+                    employee.getDni(),
+                    user.getFirstName(),
+                    user.getLastName(),
+                    user.getEmail(),
+                    user.getId(),
+                    employeeUpdateRequestDto.preferredShift(),
+                    null,
+                    employee.getWeeklyContractedHours()
+            );
+        }
+
+        @Test
+        void shouldUpdateEmployee_whenEmployeeAlreadyExists_andThereIsPreferredStores(){
+            //given
+            given(employeeRepository.findByIdWithUser(employeeId)).willReturn(Optional.of(employee));
+            willDoNothing().given(employeeMapper).updateUserFromDto(employeeUpdateRequestDto, employee.getUser());
+            willDoNothing().given(employeeMapper).updateEmployeeFromDto(employeeUpdateRequestDto, employee);
+            given(storeRepository.findAllById(employeeUpdateRequestDto.preferredStoresIds())).willReturn(List.of(store));
+            given(employeeMapper.toResponseUserEmployeeDto(employee, user)).willReturn(employeeResponseUpdated);
+            //when
+            EmployeeResponseDto result = employeeService.updateEmployee(employeeId, employeeUpdateRequestDto);
+            //then
+            assertThat(result).isEqualTo(employeeResponseUpdated);
+            verify(userRepository).save(user);
+            verify(employeeRepository).save(employee);
+        }
+
+        @Test
+        void shouldUpdateEmployee_whenEmployeeAlreadyExists_andThereIsNoPreferredStores(){
+            //given
+            given(employeeRepository.findByIdWithUser(employeeId)).willReturn(Optional.of(employee));
+            willDoNothing().given(employeeMapper).updateUserFromDto(employeeUpdateWithoutStoresDto, employee.getUser());
+            willDoNothing().given(employeeMapper).updateEmployeeFromDto(employeeUpdateWithoutStoresDto, employee);
+            given(employeeMapper.toResponseUserEmployeeDto(employee, user)).willReturn(employeeResponseUpdated);
+            //when
+            EmployeeResponseDto result = employeeService.updateEmployee(employeeId, employeeUpdateWithoutStoresDto);
+            //then
+            assertThat(result).isEqualTo(employeeResponseUpdated);
+            verify(storeRepository, never()).findAllById(any());
+            verify(userRepository).save(user);
+            verify(employeeRepository).save(employee);
+        }
+
+        @Test
+        void shouldThrowResourceNotFound_whenEmployeeNotExists(){
+            //given
+            given(employeeRepository.findByIdWithUser(employeeId)).willReturn(Optional.empty());
+            //when -> then
+            assertThatThrownBy(() -> employeeService.updateEmployee(employeeId, employeeUpdateRequestDto))
+                    .isInstanceOf(ResourceNotFoundException.class)
+                    .hasMessageContaining(employeeId.toString());
+            verify(storeRepository, never()).findAllById(any());
+            verify(userRepository, never()).save(any());
+            verify(employeeRepository, never()).save(any());
+
+        }
     }
 
     @Nested
     @DisplayName("FindEmployeeById")
     class FindEmployeeById{
+        @Test
+        void shouldReturnEmployee_whenExists(){
 
+        }
+        @Test
+        void shouldThrowResourceNotFound_whenDoesNotExist(){
+
+        }
     }
 
     @Nested
@@ -219,7 +312,7 @@ public class EmployeeServiceImplTest {
     }
 
     @Nested
-    @DisplayName("updateEmployee")
+    @DisplayName("enableEmployeeById")
     class EnableEmployeeById{
 
     }
