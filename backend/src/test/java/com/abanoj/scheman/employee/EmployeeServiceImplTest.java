@@ -120,7 +120,7 @@ public class EmployeeServiceImplTest {
         }
 
         @Test
-        void shouldReturnEmptyPage_whenDoesNotExistAnyEmployee(){
+        void shouldReturnEmptyPage_whenNoEmployeesExist(){
             //given
             Pageable pageable = PageRequest.of(0, 10);
             Page<Employee> employeePage = Page.empty(pageable);
@@ -162,7 +162,7 @@ public class EmployeeServiceImplTest {
         }
 
         @Test
-        void shouldCreateEmployee_whenEmailIsNotInUse_andThereIsNotPreferredStores(){
+        void shouldCreateEmployee_whenEmailIsNotInUse_andThereAreNoPreferredStores(){
             //given
             given(userRepository.existsByEmail(employeeCreateRequestDto.email())).willReturn(false);
             given(passwordEncoder.encode(employeeCreateRequestDto.dni())).willReturn("encodedPassword");
@@ -176,7 +176,7 @@ public class EmployeeServiceImplTest {
         }
 
         @Test
-        void shouldCreateEmployee_whenEmailIsNotInUse_andThereIsPreferredStores(){
+        void shouldCreateEmployee_whenEmailIsNotInUse_andThereArePreferredStores(){
             //given
             given(userRepository.existsByEmail(employeeCreateWithStoresRequestDto.email())).willReturn(false);
             given(passwordEncoder.encode(employeeCreateWithStoresRequestDto.dni())).willReturn("encodedPassword");
@@ -246,7 +246,7 @@ public class EmployeeServiceImplTest {
         }
 
         @Test
-        void shouldUpdateEmployee_whenEmployeeAlreadyExists_andThereIsPreferredStores(){
+        void shouldUpdateEmployee_whenEmployeeAlreadyExists_andThereArePreferredStores(){
             //given
             given(employeeRepository.findByIdWithUser(employeeId)).willReturn(Optional.of(employee));
             willDoNothing().given(employeeMapper).updateUserFromDto(employeeUpdateRequestDto, employee.getUser());
@@ -262,7 +262,7 @@ public class EmployeeServiceImplTest {
         }
 
         @Test
-        void shouldUpdateEmployee_whenEmployeeAlreadyExists_andThereIsNoPreferredStores(){
+        void shouldUpdateEmployee_whenEmployeeAlreadyExists_andThereAreNoPreferredStores(){
             //given
             given(employeeRepository.findByIdWithUser(employeeId)).willReturn(Optional.of(employee));
             willDoNothing().given(employeeMapper).updateUserFromDto(employeeUpdateWithoutStoresDto, employee.getUser());
@@ -278,7 +278,7 @@ public class EmployeeServiceImplTest {
         }
 
         @Test
-        void shouldThrowResourceNotFound_whenEmployeeNotExists(){
+        void shouldThrowResourceNotFound_whenEmployeeDoesNotExist(){
             //given
             given(employeeRepository.findByIdWithUser(employeeId)).willReturn(Optional.empty());
             //when -> then
@@ -293,7 +293,7 @@ public class EmployeeServiceImplTest {
     }
 
     @Nested
-    @DisplayName("FindEmployeeById")
+    @DisplayName("findEmployeeById")
     class FindEmployeeById{
         @Test
         void shouldReturnEmployee_whenExists(){
