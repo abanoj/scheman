@@ -297,24 +297,76 @@ public class EmployeeServiceImplTest {
     class FindEmployeeById{
         @Test
         void shouldReturnEmployee_whenExists(){
-
+            //given
+            given(employeeRepository.findByIdWithUser(employeeId)).willReturn(Optional.of(employee));
+            given(employeeMapper.toResponseUserEmployeeDto(employee, employee.getUser())).willReturn(employeeResponseDto);
+            //when
+            EmployeeResponseDto result = employeeService.findEmployeeById(employeeId);
+            //then
+            assertThat(result).isEqualTo(employeeResponseDto);
         }
         @Test
         void shouldThrowResourceNotFound_whenDoesNotExist(){
-
+            //given
+            given(employeeRepository.findByIdWithUser(employeeId)).willReturn(Optional.empty());
+            //when -> then
+            assertThatThrownBy(() -> employeeService.findEmployeeById(employeeId))
+                    .isInstanceOf(ResourceNotFoundException.class)
+                    .hasMessageContaining(employeeId.toString());
         }
     }
 
     @Nested
     @DisplayName("disableEmployeeById")
     class DisableEmployeeById{
+        @Test
+        void shouldDisableEmployee_whenExists(){
+            //given
+            given(employeeRepository.findByIdWithUser(employeeId)).willReturn(Optional.of(employee));
+            //when
+            employeeService.disableEmployeeById(employeeId);
+            //then
+            assertThat(employee.getUser().isEnabled()).isFalse();
+            verify(userRepository).save(user);
+        }
 
+        @Test
+        void shouldThrowResourceNotFound_whenDoesNotExist(){
+            //given
+            given(employeeRepository.findByIdWithUser(employeeId)).willReturn(Optional.empty());
+            //when -> then
+            assertThatThrownBy(()-> employeeService.disableEmployeeById(employeeId))
+                    .isInstanceOf(ResourceNotFoundException.class)
+                    .hasMessageContaining(employeeId.toString());
+            verify(userRepository, never()).save(any());
+        }
     }
 
     @Nested
     @DisplayName("enableEmployeeById")
     class EnableEmployeeById{
+        @Test
+        void shouldEnableEmployee_whenExists(){
+            //given
+            user.setEnabled(false);
+            given(employeeRepository.findByIdWithUser(employeeId)).willReturn(Optional.of(employee));
+            //when
+            employeeService.enableEmployeeById(employeeId);
+            //then
+            assertThat(employee.getUser().isEnabled()).isTrue();
+            verify(userRepository).save(user);
+        }
 
+        @Test
+        void shouldThrowResourceNotFound_whenDoesNotExist(){
+            //given
+            given(employeeRepository.findByIdWithUser(employeeId)).willReturn(Optional.empty());
+            //when -> then
+            assertThatThrownBy(()-> employeeService.enableEmployeeById(employeeId))
+                    .isInstanceOf(ResourceNotFoundException.class)
+                    .hasMessageContaining(employeeId.toString());
+            verify(userRepository, never()).save(any());
+        }
     }
 
 }
