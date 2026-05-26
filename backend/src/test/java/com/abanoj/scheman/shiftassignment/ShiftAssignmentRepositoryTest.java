@@ -1,0 +1,181 @@
+package com.abanoj.scheman.shiftassignment;
+
+import com.abanoj.scheman.auth.entity.Role;
+import com.abanoj.scheman.auth.entity.User;
+import com.abanoj.scheman.config.JpaAuditingConfig;
+import com.abanoj.scheman.employee.entity.Employee;
+import com.abanoj.scheman.shift.entity.Shift;
+import com.abanoj.scheman.shift.entity.ShiftType;
+import com.abanoj.scheman.shiftassignment.entity.ShiftAssignment;
+import com.abanoj.scheman.shiftassignment.repository.ShiftAssignmentRepository;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.context.annotation.Import;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+@DataJpaTest
+@Import(JpaAuditingConfig.class)
+class ShiftAssignmentRepositoryTest {
+
+    @Autowired
+    private ShiftAssignmentRepository shiftAssignmentRepository;
+    @Autowired
+    private TestEntityManager entityManager;
+
+    private static final Pageable DEFAULT_PAGEABLE = PageRequest.of(0,10);
+    private Shift shift;
+    private Employee employee;
+
+    @BeforeEach
+    void setUp(){
+        User user = User.builder()
+                .firstName("John")
+                .lastName("Doe")
+                .email("john.doe@mail.com")
+                .password("password")
+                .role(Role.EMPLOYEE)
+                .build();
+        entityManager.persist(user);
+        employee = Employee.builder()
+                .dni("Y8190012J")
+                .user(user)
+                .build();
+        entityManager.persist(employee);
+        shift = Shift.builder()
+                .name("Turno Mañana")
+                .startTime(LocalTime.of(7,30))
+                .endTime(LocalTime.of(15,30))
+                .shiftType(ShiftType.MORNING)
+                .effectiveFrom(LocalDate.of(2026,1,1))
+                .build();
+        entityManager.persistAndFlush(shift);
+    }
+
+    private ShiftAssignment persistShiftAssignment(LocalDate date, Employee employee, Shift shift){
+        ShiftAssignment shiftAssignment = ShiftAssignment.builder()
+                .date(date)
+                .employee(employee)
+                .shift(shift)
+                .build();
+        entityManager.persistAndFlush(shiftAssignment);
+        return shiftAssignment;
+    }
+
+    @Nested
+    @DisplayName("findAllByShiftId")
+    class FindAllByShiftId {
+        @Test
+        void shouldReturnAllShiftsAssignments_whenShiftExists(){
+            //given
+            persistShiftAssignment(
+                    LocalDate.of(2026,5,26),
+                    employee,
+                    shift
+            );
+            persistShiftAssignment(
+                    LocalDate.of(2026,5,27),
+                    employee,
+                    shift
+            );
+            entityManager.clear();
+            //when
+            Page<ShiftAssignment> result = shiftAssignmentRepository.findAllByShiftId(DEFAULT_PAGEABLE, shift.getId());
+            //then
+            assertThat(result.getContent()).hasSize(2);
+            assertThat(result.getContent())
+                    .extracting(ShiftAssignment::getDate)
+                    .containsExactlyInAnyOrder(
+                            LocalDate.of(2026,5,26),
+                            LocalDate.of(2026,5,27)
+                    );
+        }
+        @Test
+        void shouldReturnEmptyPage_whenShiftHasNoShiftAssignment(){
+            //given
+            entityManager.clear();
+            //when
+            Page<ShiftAssignment> result = shiftAssignmentRepository.findAllByShiftId(DEFAULT_PAGEABLE, shift.getId());
+            //then
+            assertThat(result.getContent()).isEmpty();
+            assertThat(result.getTotalElements()).isZero();
+        }
+        @Test
+        void shouldNotReturnShiftAssignmentFromAnotherShift(){
+            //given
+            Shift shiftAfternoon = Shift.builder()
+                    .name("Turno Tarde")
+                    .startTime(LocalTime.of(15,30))
+                    .endTime(LocalTime.of(23,30))
+                    .shiftType(ShiftType.AFTERNOON)
+                    .effectiveFrom(LocalDate.of(2026,1,1))
+                    .build();
+            entityManager.persistAndFlush(shiftAfternoon);
+            persistShiftAssignment(
+                    LocalDate.of(2026,5,26),
+                    employee,
+                    shift
+            );
+            persistShiftAssignment(
+                    LocalDate.of(2026,2,1),
+                    employee,
+                    shiftAfternoon
+            );
+            entityManager.clear();
+            //when
+            Page<ShiftAssignment> result = shiftAssignmentRepository.findAllByShiftId(DEFAULT_PAGEABLE, shiftAfternoon.getId());
+            //then
+            assertThat(result.getContent()).hasSize(1);
+            assertThat(result.getContent())
+                    .extracting(ShiftAssignment::getDate)
+                    .containsExactly(LocalDate.of(2026,2,1));
+        }
+
+    }
+
+    @Nested
+    @DisplayName("findByEmployeeIdAndDateBetween")
+    class FindByEmployeeIdAndDateBetween{
+        @Test
+        void shouldReturnShiftAssignment_whenTheyAreBetweenRangeDate(){
+            //given
+            persistShiftAssignment(LocalDate.of(2026,1,2),employee, shift);
+            persistShiftAssignment(LocalDate.of(2026,3,5),employee, shift);
+            persistShiftAssignment(LocalDate.of(2026,6,10),employee, shift);
+            entityManager.clear();
+            //when
+            List<ShiftAssignment> result = shiftAssignmentRepository
+                    .findByEmployeeIdAndDateBetween(
+                            employee.getId(),
+                            LocalDate.of(2026,1,1),
+                            LocalDate.of(2026,6,30)
+                    );
+            //then
+            assertThat(result).hasSize(3);
+            assertThat(result).extracting(ShiftAssignment::getDate)
+                    .containsExactlyInAnyOrder(
+                            LocalDate.of(2026,1,2),
+                            LocalDate.of(2026,3,5),
+                            LocalDate.of(2026,6,10)
+                    );
+        }
+    }
+
+    @Nested
+    @DisplayName("findByShiftIdAndDateBetween")
+    class FindByShiftIdAndDateBetween{
+
+    }
+}
