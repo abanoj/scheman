@@ -78,7 +78,7 @@ class ShiftAssignmentRepositoryTest {
     @DisplayName("findAllByShiftId")
     class FindAllByShiftId {
         @Test
-        void shouldReturnAllShiftsAssignments_whenShiftExists(){
+        void shouldReturnAllShiftAssignments_whenShiftExists(){
             //given
             persistShiftAssignment(
                     LocalDate.of(2026,5,26),
@@ -103,7 +103,7 @@ class ShiftAssignmentRepositoryTest {
                     );
         }
         @Test
-        void shouldReturnEmptyPage_whenShiftHasNoShiftAssignment(){
+        void shouldReturnEmptyPage_whenShiftHasNoShiftAssignments(){
             //given
             entityManager.clear();
             //when
@@ -149,7 +149,7 @@ class ShiftAssignmentRepositoryTest {
     @DisplayName("findByEmployeeIdAndDateBetween")
     class FindByEmployeeIdAndDateBetween{
         @Test
-        void shouldReturnShiftAssignment_whenTheyAreBetweenRangeDate(){
+        void shouldReturnShiftAssignments_whenTheyAreWithinDateRange(){
             //given
             persistShiftAssignment(LocalDate.of(2026,1,2),employee, shift);
             persistShiftAssignment(LocalDate.of(2026,3,5),employee, shift);
@@ -173,7 +173,7 @@ class ShiftAssignmentRepositoryTest {
         }
 
         @Test
-        void shouldReturnShiftAssignment_whenTheyAreInBoundRangeDate(){
+        void shouldReturnShiftAssignments_whenDatesAreOnRangeBoundaries(){
             //given
             persistShiftAssignment(LocalDate.of(2026,1,1),employee, shift);
             persistShiftAssignment(LocalDate.of(2026,6,30),employee, shift);
@@ -195,7 +195,7 @@ class ShiftAssignmentRepositoryTest {
         }
 
         @Test
-        void shouldReturnEmpty_whenThereAreNotShiftAssignmentBetweenRangeDate(){
+        void shouldReturnEmpty_whenThereAreNoShiftAssignmentsWithinDateRange(){
             //given
             persistShiftAssignment(LocalDate.of(2026,1,2),employee, shift);
             persistShiftAssignment(LocalDate.of(2026,3,5),employee, shift);
@@ -213,7 +213,7 @@ class ShiftAssignmentRepositoryTest {
         }
 
         @Test
-        void shouldReturnEmpty_whenThereAreNotShiftAssignmentForTheEmployee(){
+        void shouldReturnEmpty_whenThereAreNoShiftAssignmentsForTheEmployee(){
             //given
             persistShiftAssignment(LocalDate.of(2026,1,2),employee, shift);
             persistShiftAssignment(LocalDate.of(2026,3,5),employee, shift);
@@ -324,7 +324,7 @@ class ShiftAssignmentRepositoryTest {
         }
 
         @Test
-        void shouldReturnShiftAssignments_whenTheyAreBetweenRangeDate(){
+        void shouldReturnShiftAssignments_whenTheyAreWithinDateRange(){
             //given
             persistShiftAssignment(LocalDate.of(2026,2,1),employee, shift);
             persistShiftAssignment(LocalDate.of(2026,4,15),employee, shiftAfternoon);
@@ -348,7 +348,7 @@ class ShiftAssignmentRepositoryTest {
         }
 
         @Test
-        void shouldReturnShiftAssignments_whenTheyAreInBoundRangeDate(){
+        void shouldReturnShiftAssignments_whenDatesAreOnRangeBoundaries(){
             //given
             persistShiftAssignment(LocalDate.of(2026,1,1),employee, shift);
             persistShiftAssignment(LocalDate.of(2026,6,30),employee, shiftAfternoon);
@@ -370,7 +370,7 @@ class ShiftAssignmentRepositoryTest {
         }
 
         @Test
-        void shouldReturnEmpty_whenNoShiftAssignmentsBetweenRangeDate(){
+        void shouldReturnEmpty_whenNoShiftAssignmentsWithinDateRange(){
             //given
             persistShiftAssignment(LocalDate.of(2026,2,1),employee, shift);
             persistShiftAssignment(LocalDate.of(2026,3,10),employee, shiftAfternoon);
