@@ -1,5 +1,6 @@
 package com.abanoj.scheman.store.service;
 
+import com.abanoj.scheman.exception.ConflictException;
 import com.abanoj.scheman.exception.ResourceNotFoundException;
 import com.abanoj.scheman.store.dto.StoreCreateRequestDto;
 import com.abanoj.scheman.store.dto.StoreListResponseDto;
@@ -64,8 +65,12 @@ public class StoreServiceImpl implements StoreService{
     @Override
     @Transactional
     public void deleteStore(UUID id) {
-        Store store = storeRepository.findByIdAndDeletedFalse(id)
+        Store store = storeRepository.findWithShiftsByIdAndDeletedFalse(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Store not found with id " + id));
+
+        if (!store.getShifts().isEmpty()) {
+            throw new ConflictException("Cannot delete store with active shifts");
+        }
 
         store.setDeleted(true);
         storeRepository.save(store);
