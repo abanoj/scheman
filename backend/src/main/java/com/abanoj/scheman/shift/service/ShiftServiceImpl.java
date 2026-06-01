@@ -76,7 +76,7 @@ public class ShiftServiceImpl implements ShiftService{
                 .availableDays(shiftUpdateRequestDto.availableDays())
                 .groupId(shift.getGroupId())
                 .effectiveFrom(LocalDate.now())
-                .shiftType(shift.getShiftType())
+                .shiftType(shiftUpdateRequestDto.shiftType())
                 .build();
 
         shiftRepository.saveAll(List.of(shift, newShift));
