@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.DayOfWeek;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,6 +30,8 @@ import java.util.UUID;
 @Slf4j
 @RequiredArgsConstructor
 public class ShiftAssignmentServiceImpl implements ShiftAssignmentService{
+
+    private static final int MIN_REST_HOURS = 12;
 
     private final ShiftAssignmentRepository shiftAssignmentRepository;
     private final ShiftAssignmentMapper shiftAssignmentMapper;
@@ -128,30 +131,45 @@ public class ShiftAssignmentServiceImpl implements ShiftAssignmentService{
 
     private void validateNoOverlap(UUID employeeId, LocalDate date, Shift newShift, UUID excludeAssignmentId) {
         List<ShiftAssignment> existing = shiftAssignmentRepository
-                .findByEmployeeIdAndDateBetween(employeeId, date.minusDays(1), date);
+                .findByEmployeeIdAndDateBetween(employeeId, date.minusDays(1), date.plusDays(1));
 
         for (ShiftAssignment assignment : existing) {
             if (excludeAssignmentId != null && excludeAssignmentId.equals(assignment.getId())) {
                 continue;
             }
-            if (overlaps(assignment.getShift(), assignment.getDate(), newShift, date)) {
-                throw new ConflictException("Employee already has an overlapping shift on " + date);
+
+            if (assignment.getDate().equals(date)) {
+                throw new ConflictException("Employee already has a shift assigned on " + date);
+            }
+
+            if (assignment.getDate().equals(date.minusDays(1))) {
+                LocalDateTime previousEnd = calculateShiftEndDateTime(assignment.getShift(), assignment.getDate());
+                LocalDateTime newStart = date.atTime(newShift.getStartTime());
+                if (Duration.between(previousEnd, newStart).toHours() < MIN_REST_HOURS) {
+                    throw new ConflictException(
+                            "Insufficient rest time: minimum " + MIN_REST_HOURS
+                                    + " hours required between shifts"
+                    );
+                }
+            }
+
+            if (assignment.getDate().equals(date.plusDays(1))) {
+                LocalDateTime newEnd = calculateShiftEndDateTime(newShift, date);
+                LocalDateTime nextStart = assignment.getDate().atTime(assignment.getShift().getStartTime());
+                if (Duration.between(newEnd, nextStart).toHours() < MIN_REST_HOURS) {
+                    throw new ConflictException(
+                            "Insufficient rest time: minimum " + MIN_REST_HOURS
+                                    + " hours required between shifts"
+                    );
+                }
             }
         }
     }
 
-    private boolean overlaps(Shift a, LocalDate dateA, Shift b, LocalDate dateB) {
-        LocalDateTime startA = dateA.atTime(a.getStartTime());
-        LocalDateTime endA = a.isCrossesMidnight()
-                ? dateA.plusDays(1).atTime(a.getEndTime())
-                : dateA.atTime(a.getEndTime());
-
-        LocalDateTime startB = dateB.atTime(b.getStartTime());
-        LocalDateTime endB = b.isCrossesMidnight()
-                ? dateB.plusDays(1).atTime(b.getEndTime())
-                : dateB.atTime(b.getEndTime());
-
-        return startA.isBefore(endB) && startB.isBefore(endA);
+    private LocalDateTime calculateShiftEndDateTime(Shift shift, LocalDate date) {
+        return shift.isCrossesMidnight()
+                ? date.plusDays(1).atTime(shift.getEndTime())
+                : date.atTime(shift.getEndTime());
     }
 
     private ShiftAssignment findShiftAssignmentOrThrow(UUID shiftId, UUID id) {

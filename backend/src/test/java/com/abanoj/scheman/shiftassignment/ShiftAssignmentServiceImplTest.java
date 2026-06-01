@@ -200,7 +200,7 @@ public class ShiftAssignmentServiceImplTest {
             given(shiftAssignmentRepository.findByEmployeeIdAndDateBetween(
                     employeeId,
                     shiftAssignmentCreateRequestDto.date().minusDays(1),
-                    shiftAssignmentCreateRequestDto.date()
+                    shiftAssignmentCreateRequestDto.date().plusDays(1)
             )).willReturn(List.of());
             given(shiftAssignmentMapper.toShiftAssignment(shiftAssignmentCreateRequestDto)).willReturn(shiftAssignment);
             given(shiftAssignmentMapper.toResponseDto(shiftAssignment)).willReturn(shiftAssignmentResponseDto);
@@ -255,7 +255,7 @@ public class ShiftAssignmentServiceImplTest {
             given(shiftAssignmentRepository.findByEmployeeIdAndDateBetween(
                     employeeId,
                     shiftAssignmentCreateRequestDto.date().minusDays(1),
-                    shiftAssignmentCreateRequestDto.date()
+                    shiftAssignmentCreateRequestDto.date().plusDays(1)
             )).willReturn(List.of(shiftAssignment));
             //when -> then
             assertThatThrownBy(() -> shiftAssignmentService.createShiftAssignment(newShiftId, shiftAssignmentCreateRequestDto))
@@ -295,7 +295,7 @@ public class ShiftAssignmentServiceImplTest {
             given(shiftAssignmentRepository.findByEmployeeIdAndDateBetween(
                     employeeId,
                     shiftAssignmentUpdateRequestDto.date().minusDays(1),
-                    shiftAssignmentUpdateRequestDto.date()
+                    shiftAssignmentUpdateRequestDto.date().plusDays(1)
             )).willReturn(List.of());
             given(shiftAssignmentMapper.toResponseDto(shiftAssignment)).willReturn(shiftAssignmentUpdateResponseDto);
             //when
@@ -368,7 +368,7 @@ public class ShiftAssignmentServiceImplTest {
             given(shiftAssignmentRepository.findByEmployeeIdAndDateBetween(
                     employeeId,
                     shiftAssignmentUpdateRequestDto.date().minusDays(1),
-                    shiftAssignmentUpdateRequestDto.date()
+                    shiftAssignmentUpdateRequestDto.date().plusDays(1)
             )).willReturn(List.of(existingAssignment));
             //when -> then
             assertThatThrownBy(() -> shiftAssignmentService.updateShiftAssignment(shiftId, id, shiftAssignmentUpdateRequestDto))
