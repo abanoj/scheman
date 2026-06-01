@@ -33,6 +33,9 @@ application:
       refresh:
         expiration: 604800000
       secret-key: ${JWT_SECRET}
+    rate-limit:
+      max-attempts: 5
+      refill-minutes: 10
   admin:
     email: admin@abanoj.com
     password: ${ADMIN_PASSWORD:admin123}

@@ -17,6 +17,9 @@ application:
       expiration: 900000
       refresh:
         expiration: 604800000
+    rate-limit:
+      max-attempts: 5
+      refill-minutes: 15
   admin:
     email: admin@abanoj.com
     password: admin
