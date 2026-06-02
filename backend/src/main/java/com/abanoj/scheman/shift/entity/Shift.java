@@ -17,7 +17,10 @@ import java.util.UUID;
 @AllArgsConstructor
 @SuperBuilder
 @Entity
-@Table(name = "shifts")
+@Table(name = "shifts", indexes = {
+        @Index(name = "idx_shifts_store_id", columnList = "store_id"),
+        @Index(name = "idx_shifts_group_id", columnList = "group_id")
+})
 public class Shift extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
