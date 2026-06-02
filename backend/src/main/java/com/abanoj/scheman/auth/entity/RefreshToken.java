@@ -9,12 +9,14 @@ import java.time.Instant;
 import java.util.UUID;
 
 @Entity
-@Table(name = "refresh_tokens")
 @Getter
 @Setter
 @SuperBuilder
 @NoArgsConstructor
 @AllArgsConstructor
+@Table(name = "refresh_tokens", indexes = {
+        @Index(name = "idx_refresh_token_user_id", columnList = "user_id")
+})
 public class RefreshToken extends BaseEntity {
 
     @Id
