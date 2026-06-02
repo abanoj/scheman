@@ -38,13 +38,16 @@ public class Employee extends BaseEntity {
             joinColumns = @JoinColumn(name = "employee_id"),
             inverseJoinColumns = @JoinColumn(name = "store_id")
     )
+    @OrderColumn(name = "preference_order")
     @Builder.Default
     private List<Store> preferredStores = new ArrayList<>();
     private Integer weeklyContractedHours;
 
     public void addStore(Store store){
+        if(!this.preferredStores.contains(store)){
         this.preferredStores.add(store);
         store.getPreferredEmployees().add(this);
+        }
     }
 
     public void removeStore(Store store){
