@@ -1,6 +1,7 @@
 package com.abanoj.scheman.shiftassignment;
 
 import com.abanoj.scheman.config.CorsProperties;
+import com.abanoj.scheman.config.RateLimitProperties;
 import com.abanoj.scheman.exception.ResourceNotFoundException;
 import com.abanoj.scheman.security.JwtService;
 import com.abanoj.scheman.shiftassignment.controller.EmployeeShiftAssignmentController;
@@ -44,6 +45,9 @@ class EmployeeShiftAssignmentControllerTest {
 
     @MockitoBean
     private CorsProperties corsProperties;
+
+    @MockitoBean
+    private RateLimitProperties rateLimitProperties;
 
     private static final String BASE_URL = "/api/v1/shift-assignments/employees";
 

@@ -3,6 +3,7 @@ package com.abanoj.scheman.employee;
 import com.abanoj.scheman.auth.entity.Role;
 import com.abanoj.scheman.auth.entity.User;
 import com.abanoj.scheman.config.CorsProperties;
+import com.abanoj.scheman.config.RateLimitProperties;
 import com.abanoj.scheman.employee.controller.EmployeeController;
 import com.abanoj.scheman.employee.dto.EmployeeCreateRequestDto;
 import com.abanoj.scheman.employee.dto.EmployeeResponseDto;
@@ -63,6 +64,9 @@ class EmployeeControllerTest {
 
     @MockitoBean
     private CorsProperties corsProperties;
+
+    @MockitoBean
+    private RateLimitProperties rateLimitProperties;
 
     private static final String BASE_URL = "/api/v1/employees";
 

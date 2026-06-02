@@ -1,6 +1,7 @@
 package com.abanoj.scheman.shiftassignment;
 
 import com.abanoj.scheman.config.CorsProperties;
+import com.abanoj.scheman.config.RateLimitProperties;
 import com.abanoj.scheman.security.JwtService;
 import com.abanoj.scheman.shiftassignment.controller.ShiftAssignmentController;
 import com.abanoj.scheman.shiftassignment.dto.ShiftAssignmentCreateRequestDto;
@@ -53,6 +54,9 @@ public class ShiftAssignmentControllerSecurityTest {
 
     @MockitoBean
     private CorsProperties corsProperties;
+
+    @MockitoBean
+    private RateLimitProperties rateLimitProperties;
 
     private static final UUID SHIFT_ID = UUID.randomUUID();
     private static final UUID ASSIGNMENT_ID = UUID.randomUUID();

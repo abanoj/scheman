@@ -1,6 +1,7 @@
 package com.abanoj.scheman.store;
 
 import com.abanoj.scheman.config.CorsProperties;
+import com.abanoj.scheman.config.RateLimitProperties;
 import com.abanoj.scheman.exception.ConflictException;
 import com.abanoj.scheman.exception.ResourceNotFoundException;
 import com.abanoj.scheman.security.JwtService;
@@ -55,6 +56,9 @@ class StoreControllerTest {
 
     @MockitoBean
     private CorsProperties corsProperties;
+
+    @MockitoBean
+    private RateLimitProperties rateLimitProperties;
 
     private static final String BASE_URL = "/api/v1/stores";
 

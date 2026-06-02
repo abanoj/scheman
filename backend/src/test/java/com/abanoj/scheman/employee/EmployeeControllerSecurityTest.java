@@ -1,6 +1,7 @@
 package com.abanoj.scheman.employee;
 
 import com.abanoj.scheman.config.CorsProperties;
+import com.abanoj.scheman.config.RateLimitProperties;
 import com.abanoj.scheman.employee.controller.EmployeeController;
 import com.abanoj.scheman.employee.dto.EmployeeCreateRequestDto;
 import com.abanoj.scheman.employee.service.EmployeeService;
@@ -53,6 +54,9 @@ public class EmployeeControllerSecurityTest {
 
     @MockitoBean
     private CorsProperties corsProperties;
+
+    @MockitoBean
+    private RateLimitProperties rateLimitProperties;
 
     private static final String BASE_URL = "/api/v1/employees";
     private static final UUID EMPLOYEE_ID = UUID.randomUUID();

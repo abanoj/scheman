@@ -1,6 +1,7 @@
 package com.abanoj.scheman.shift;
 
 import com.abanoj.scheman.config.CorsProperties;
+import com.abanoj.scheman.config.RateLimitProperties;
 import com.abanoj.scheman.security.JwtService;
 import com.abanoj.scheman.shift.controller.ShiftController;
 import com.abanoj.scheman.shift.dto.ShiftCreateRequestDto;
@@ -57,6 +58,9 @@ public class ShiftControllerSecurityTest {
 
     @MockitoBean
     private CorsProperties corsProperties;
+
+    @MockitoBean
+    private RateLimitProperties rateLimitProperties;
 
     private static final UUID STORE_ID = UUID.randomUUID();
     private static final UUID SHIFT_ID = UUID.randomUUID();

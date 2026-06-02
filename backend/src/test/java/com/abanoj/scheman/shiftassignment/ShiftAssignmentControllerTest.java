@@ -1,6 +1,7 @@
 package com.abanoj.scheman.shiftassignment;
 
 import com.abanoj.scheman.config.CorsProperties;
+import com.abanoj.scheman.config.RateLimitProperties;
 import com.abanoj.scheman.exception.ConflictException;
 import com.abanoj.scheman.exception.ResourceNotFoundException;
 import com.abanoj.scheman.security.JwtService;
@@ -58,6 +59,9 @@ class ShiftAssignmentControllerTest {
 
     @MockitoBean
     private CorsProperties corsProperties;
+
+    @MockitoBean
+    private RateLimitProperties rateLimitProperties;
 
     private UUID shiftId;
     private UUID assignmentId;
