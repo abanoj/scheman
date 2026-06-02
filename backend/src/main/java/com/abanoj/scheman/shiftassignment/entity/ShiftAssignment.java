@@ -16,9 +16,14 @@ import java.util.UUID;
 @AllArgsConstructor
 @SuperBuilder
 @Entity
-@Table(name = "shift_assignments", uniqueConstraints = {
+@Table(name = "shift_assignments",
+        uniqueConstraints = {
         @UniqueConstraint(columnNames = {"employee_id", "date"})
-})
+        },
+        indexes = {
+        @Index(name = "idx_shift_assignments_shift_id", columnList = "shift_id")
+        }
+)
 public class ShiftAssignment extends BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
