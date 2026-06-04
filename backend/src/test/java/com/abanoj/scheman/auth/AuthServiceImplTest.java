@@ -101,7 +101,6 @@ public class AuthServiceImplTest {
             //given
             given(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
                     .willReturn(new UsernamePasswordAuthenticationToken(user, null));
-            given(userRepository.findByEmail(loginRequestDto.email())).willReturn(Optional.of(user));
             willDoNothing().given(refreshTokenRepository).revokeAllByUser(user);
             given(jwtService.generateAccessToken(user)).willReturn("access-token");
             given(jwtService.generateRefreshToken(user)).willReturn("refresh-token");
@@ -116,19 +115,7 @@ public class AuthServiceImplTest {
             verify(authenticationManager).authenticate(any(UsernamePasswordAuthenticationToken.class));
             verify(refreshTokenRepository).revokeAllByUser(user);
             verify(refreshTokenRepository).save(any(RefreshToken.class));
-        }
-
-        @Test
-        void shouldThrowAuthenticationFailed_whenUserNotFound() {
-            //given
-            given(authenticationManager.authenticate(any(UsernamePasswordAuthenticationToken.class)))
-                    .willReturn(new UsernamePasswordAuthenticationToken(user, null));
-            given(userRepository.findByEmail(loginRequestDto.email())).willReturn(Optional.empty());
-            //when -> then
-            assertThatThrownBy(() -> authService.login(loginRequestDto))
-                    .isInstanceOf(AuthenticationFailedException.class)
-                    .hasMessageContaining("Invalid email or password");
-            verify(refreshTokenRepository, never()).revokeAllByUser(any());
+            verify(userRepository, never()).findByEmail(any());
         }
 
         @Test
