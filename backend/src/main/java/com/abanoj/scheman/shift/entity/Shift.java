@@ -42,6 +42,7 @@ public class Shift extends BaseEntity {
 
     private UUID groupId;
     private LocalDate effectiveFrom;
+    @Builder.Default
     private LocalDate effectiveTo = null;
     @Builder.Default
     private boolean deleted = false;
