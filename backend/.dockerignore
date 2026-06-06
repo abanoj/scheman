@@ -1,0 +1,13 @@
+target/
+.idea/
+.vscode/
+.env
+*.iml
+*.iws
+*.ipr
+.git/
+.gitignore
+README.md
+HELP.md
+*.pdf
+*.drawio
