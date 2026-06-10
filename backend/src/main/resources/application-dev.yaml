@@ -19,6 +19,8 @@ spring:
         format_sql: true
     open-in-view: false
     show-sql: false
+  flyway:
+    enabled: false
 ## Exception
 server:
   forward-headers-strategy: native
