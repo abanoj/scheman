@@ -33,6 +33,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static com.abanoj.scheman.shiftassignment.service.ShiftAssignmentServiceImpl.MIN_REST_HOURS;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
@@ -241,14 +242,14 @@ public class ShiftAssignmentServiceImplTest {
         }
 
         @Test
-        void shouldThrowConflict_whenEmployeeHasOverlappingShift(){
+        void shouldThrowConflict_whenEmployeeHasExistingShiftInTheSameDay(){
             //given
             UUID newShiftId = UUID.randomUUID();
             Shift newShift = Shift.builder()
                     .id(newShiftId)
                     .name("New Shift")
-                    .startTime(LocalTime.of(10, 0))
-                    .endTime(LocalTime.of(18, 0))
+                    .startTime(LocalTime.of(23, 30))
+                    .endTime(LocalTime.of(7, 30))
                     .build();
             given(shiftRepository.findById(newShiftId)).willReturn(Optional.of(newShift));
             given(employeeRepository.findById(employeeId)).willReturn(Optional.of(employee));
@@ -260,9 +261,85 @@ public class ShiftAssignmentServiceImplTest {
             //when -> then
             assertThatThrownBy(() -> shiftAssignmentService.createShiftAssignment(newShiftId, shiftAssignmentCreateRequestDto))
                     .isInstanceOf(ConflictException.class)
-                    .hasMessageContaining(shiftAssignmentCreateRequestDto.date().toString());
+                    .hasMessageContaining("Employee already has a shift assigned on " + shiftAssignmentCreateRequestDto.date().toString());
             verify(shiftAssignmentRepository, never()).save(any());
         }
+
+        @Test
+        void shouldThrowConflict_whenNewShiftStartsWithInsufficientRestAfterExistingShift(){
+            //given
+            UUID newShiftId = UUID.randomUUID();
+            Shift shift = Shift.builder()
+                    .name("Existing Shift")
+                    .startTime(LocalTime.of(23, 30))
+                    .endTime(LocalTime.of(7, 30))
+                    .build();
+            Shift newShift = Shift.builder()
+                    .id(newShiftId)
+                    .name("New Shift")
+                    .startTime(LocalTime.of(15, 30))
+                    .endTime(LocalTime.of(23, 30))
+                    .build();
+            ShiftAssignment shiftAssignment = ShiftAssignment.builder()
+                    .id(id)
+                    .date(LocalDate.of(2026,6,1))
+                    .employee(employee)
+                    .shift(shift)
+                    .build();
+            ShiftAssignmentCreateRequestDto shiftAssignmentCreateRequestDto = new ShiftAssignmentCreateRequestDto(
+                    shiftAssignment.getDate().plusDays(1),
+                    shiftAssignment.getEmployee().getId());
+            given(shiftRepository.findById(newShiftId)).willReturn(Optional.of(newShift));
+            given(employeeRepository.findById(employeeId)).willReturn(Optional.of(employee));
+            given(shiftAssignmentRepository.findByEmployeeIdAndDateBetween(
+                    employeeId,
+                    shiftAssignmentCreateRequestDto.date().minusDays(1),
+                    shiftAssignmentCreateRequestDto.date().plusDays(1)
+            )).willReturn(List.of(shiftAssignment));
+            //when -> then
+            assertThatThrownBy(() -> shiftAssignmentService.createShiftAssignment(newShiftId, shiftAssignmentCreateRequestDto))
+                    .isInstanceOf(ConflictException.class)
+                    .hasMessageContaining("Insufficient rest time: minimum " + MIN_REST_HOURS
+                            + " hours required between shifts");
+            verify(shiftAssignmentRepository, never()).save(any());
+        }
+
+        @Test
+        void shouldThrowConflict_whenNewShiftEndsWithInsufficientRestBeforeNextDayShift(){
+            //given
+            UUID newShiftId = UUID.randomUUID();
+            Shift newShift = Shift.builder()
+                    .id(newShiftId)
+                    .name("New Shift")
+                    .startTime(LocalTime.of(14, 0))
+                    .endTime(LocalTime.of(22, 0))
+                    .build();
+            Shift nextDayShift = Shift.builder()
+                    .name("Next Day Shift")
+                    .startTime(LocalTime.of(8, 0))
+                    .endTime(LocalTime.of(16, 0))
+                    .build();
+            ShiftAssignment nextDayAssignment = ShiftAssignment.builder()
+                    .id(UUID.randomUUID())
+                    .date(shiftAssignmentCreateRequestDto.date().plusDays(1))
+                    .employee(employee)
+                    .shift(nextDayShift)
+                    .build();
+            given(shiftRepository.findById(newShiftId)).willReturn(Optional.of(newShift));
+            given(employeeRepository.findById(employeeId)).willReturn(Optional.of(employee));
+            given(shiftAssignmentRepository.findByEmployeeIdAndDateBetween(
+                    employeeId,
+                    shiftAssignmentCreateRequestDto.date().minusDays(1),
+                    shiftAssignmentCreateRequestDto.date().plusDays(1)
+            )).willReturn(List.of(nextDayAssignment));
+            //when -> then
+            assertThatThrownBy(() -> shiftAssignmentService.createShiftAssignment(newShiftId, shiftAssignmentCreateRequestDto))
+                    .isInstanceOf(ConflictException.class)
+                    .hasMessageContaining("Insufficient rest time: minimum " + MIN_REST_HOURS
+                            + " hours required between shifts");
+            verify(shiftAssignmentRepository, never()).save(any());
+        }
+
     }
 
     @Nested
@@ -303,6 +380,30 @@ public class ShiftAssignmentServiceImplTest {
             //then
             assertThat(result).isEqualTo(shiftAssignmentUpdateResponseDto);
             verify(shiftAssignmentMapper).updateShiftAssignmentFromDto(shiftAssignmentUpdateRequestDto, shiftAssignment);
+            verify(shiftAssignmentRepository).save(shiftAssignment);
+        }
+
+        @Test
+        void shouldUpdateShiftAssignment_whenOwnAssignmentIsInOverlapWindow(){
+            //given
+            ShiftAssignmentUpdateRequestDto sameDateRequest = new ShiftAssignmentUpdateRequestDto(
+                    shiftAssignment.getDate(),
+                    employeeId
+            );
+            given(shiftRepository.findById(shiftId)).willReturn(Optional.of(shift));
+            given(shiftAssignmentRepository.findByIdAndShiftId(id, shiftId)).willReturn(Optional.of(shiftAssignment));
+            given(employeeRepository.findById(employeeId)).willReturn(Optional.of(employee));
+            given(shiftAssignmentRepository.findByEmployeeIdAndDateBetween(
+                    employeeId,
+                    sameDateRequest.date().minusDays(1),
+                    sameDateRequest.date().plusDays(1)
+            )).willReturn(List.of(shiftAssignment));
+            given(shiftAssignmentMapper.toResponseDto(shiftAssignment)).willReturn(shiftAssignmentResponseDto);
+            //when
+            ShiftAssignmentResponseDto result = shiftAssignmentService.updateShiftAssignment(shiftId, id, sameDateRequest);
+            //then
+            assertThat(result).isEqualTo(shiftAssignmentResponseDto);
+            verify(shiftAssignmentMapper).updateShiftAssignmentFromDto(sameDateRequest, shiftAssignment);
             verify(shiftAssignmentRepository).save(shiftAssignment);
         }
 

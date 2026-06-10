@@ -31,7 +31,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class ShiftAssignmentServiceImpl implements ShiftAssignmentService{
 
-    private static final int MIN_REST_HOURS = 12;
+    public static final int MIN_REST_HOURS = 12;
 
     private final ShiftAssignmentRepository shiftAssignmentRepository;
     private final ShiftAssignmentMapper shiftAssignmentMapper;
