@@ -190,6 +190,20 @@ public class EmployeeServiceImplTest {
             verify(employeeRepository, times(2)).save(any(Employee.class));
         }
 
+        @Test
+        void shouldCreateEmployee_whenEmailIsNotInUse_andPreferredStoresIsEmpty(){
+            //given
+            given(userRepository.existsByEmail(employeeCreateWithStoresRequestDto.email())).willReturn(false);
+            given(passwordEncoder.encode(employeeCreateWithStoresRequestDto.dni())).willReturn("encodedPassword");
+            given(storeRepository.findAllById(employeeCreateWithStoresRequestDto.preferredStoresIDs())).willReturn(List.of());
+            given(employeeMapper.toResponseUserEmployeeDto(any(Employee.class), any(User.class))).willReturn(employeeResponseDto);
+            //when
+            EmployeeResponseDto result = employeeService.create(employeeCreateWithStoresRequestDto);
+            //then
+            assertThat(result).isEqualTo(employeeResponseDto);
+            verify(userRepository).save(any(User.class));
+            verify(employeeRepository, times(2)).save(any(Employee.class));
+        }
 
         @Test
         void shouldThrowConflict_whenEmailIsAlreadyInUse(){
