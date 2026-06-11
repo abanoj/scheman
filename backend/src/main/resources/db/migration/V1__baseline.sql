@@ -24,7 +24,7 @@ SET default_table_access_method = heap;
 -- Name: employee_store; Type: TABLE; Schema: public; Owner: root
 --
 
-CREATE TABLE public.employee_store (
+CREATE TABLE IF NOT EXISTS public.employee_store (
     preference_order integer NOT NULL,
     employee_id uuid NOT NULL,
     store_id uuid NOT NULL
@@ -37,7 +37,7 @@ ALTER TABLE public.employee_store OWNER TO root;
 -- Name: employees; Type: TABLE; Schema: public; Owner: root
 --
 
-CREATE TABLE public.employees (
+CREATE TABLE IF NOT EXISTS public.employees (
     weekly_contracted_hours integer,
     created_at timestamp(6) with time zone NOT NULL,
     updated_at timestamp(6) with time zone NOT NULL,
@@ -55,7 +55,7 @@ ALTER TABLE public.employees OWNER TO root;
 -- Name: refresh_tokens; Type: TABLE; Schema: public; Owner: root
 --
 
-CREATE TABLE public.refresh_tokens (
+CREATE TABLE IF NOT EXISTS public.refresh_tokens (
     revoked boolean NOT NULL,
     created_at timestamp(6) with time zone NOT NULL,
     expiry_date timestamp(6) with time zone NOT NULL,
@@ -72,7 +72,7 @@ ALTER TABLE public.refresh_tokens OWNER TO root;
 -- Name: shift_assignments; Type: TABLE; Schema: public; Owner: root
 --
 
-CREATE TABLE public.shift_assignments (
+CREATE TABLE IF NOT EXISTS public.shift_assignments (
     date date NOT NULL,
     created_at timestamp(6) with time zone NOT NULL,
     updated_at timestamp(6) with time zone NOT NULL,
@@ -88,7 +88,7 @@ ALTER TABLE public.shift_assignments OWNER TO root;
 -- Name: shift_available_days; Type: TABLE; Schema: public; Owner: root
 --
 
-CREATE TABLE public.shift_available_days (
+CREATE TABLE IF NOT EXISTS public.shift_available_days (
     shift_id uuid NOT NULL,
     available_days character varying(255),
     CONSTRAINT shift_available_days_available_days_check CHECK (((available_days)::text = ANY ((ARRAY['MONDAY'::character varying, 'TUESDAY'::character varying, 'WEDNESDAY'::character varying, 'THURSDAY'::character varying, 'FRIDAY'::character varying, 'SATURDAY'::character varying, 'SUNDAY'::character varying])::text[])))
@@ -101,7 +101,7 @@ ALTER TABLE public.shift_available_days OWNER TO root;
 -- Name: shifts; Type: TABLE; Schema: public; Owner: root
 --
 
-CREATE TABLE public.shifts (
+CREATE TABLE IF NOT EXISTS public.shifts (
     deleted boolean NOT NULL,
     effective_from date,
     effective_to date,
@@ -124,7 +124,7 @@ ALTER TABLE public.shifts OWNER TO root;
 -- Name: stores; Type: TABLE; Schema: public; Owner: root
 --
 
-CREATE TABLE public.stores (
+CREATE TABLE IF NOT EXISTS public.stores (
     deleted boolean NOT NULL,
     is24h boolean,
     created_at timestamp(6) with time zone NOT NULL,
@@ -142,7 +142,7 @@ ALTER TABLE public.stores OWNER TO root;
 -- Name: users; Type: TABLE; Schema: public; Owner: root
 --
 
-CREATE TABLE public.users (
+CREATE TABLE IF NOT EXISTS public.users (
     enabled boolean NOT NULL,
     must_change_password boolean NOT NULL,
     created_at timestamp(6) with time zone NOT NULL,
