@@ -32,6 +32,7 @@ import java.util.UUID;
 public class ShiftAssignmentServiceImpl implements ShiftAssignmentService{
 
     public static final int MIN_REST_HOURS = 12;
+    public static final String NOT_FOUND_EMPLOYEE_MESSAGE = "Not found employee with id ";
 
     private final ShiftAssignmentRepository shiftAssignmentRepository;
     private final ShiftAssignmentMapper shiftAssignmentMapper;
@@ -69,7 +70,7 @@ public class ShiftAssignmentServiceImpl implements ShiftAssignmentService{
                 .orElseThrow(() -> new ResourceNotFoundException("Not found shift with id " + shiftId));
         Employee employee = employeeRepository
                 .findById(employeeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Not found employee with id " + employeeId));
+                .orElseThrow(() -> new ResourceNotFoundException(NOT_FOUND_EMPLOYEE_MESSAGE + employeeId));
         validateNoOverlap(employeeId, shiftAssignmentCreateRequestDto.date(), shift, null);
 
         ShiftAssignment shiftAssignment = shiftAssignmentMapper.toShiftAssignment(shiftAssignmentCreateRequestDto);
@@ -92,7 +93,7 @@ public class ShiftAssignmentServiceImpl implements ShiftAssignmentService{
                 .orElseThrow(() -> new ResourceNotFoundException("Not found shift assignment with id " + id));
         Employee employee = employeeRepository
                 .findById(employeeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Not found employee with id " + employeeId));
+                .orElseThrow(() -> new ResourceNotFoundException(NOT_FOUND_EMPLOYEE_MESSAGE + employeeId));
         validateNoOverlap(employeeId, shiftAssignmentUpdateRequestDto.date(), shift, id);
 
         shiftAssignmentMapper.updateShiftAssignmentFromDto(shiftAssignmentUpdateRequestDto, shiftAssignment);
@@ -108,7 +109,7 @@ public class ShiftAssignmentServiceImpl implements ShiftAssignmentService{
     public List<ShiftAssignmentResponseDto> findWeeklyAssignmentsByEmployee(UUID employeeId, LocalDate date){
         employeeRepository
                 .findById(employeeId)
-                .orElseThrow(() -> new ResourceNotFoundException("Not found employee with id " + employeeId));
+                .orElseThrow(() -> new ResourceNotFoundException(NOT_FOUND_EMPLOYEE_MESSAGE + employeeId));
         LocalDate monday = date.with(DayOfWeek.MONDAY);
         LocalDate sunday = date.with(DayOfWeek.SUNDAY);
 
