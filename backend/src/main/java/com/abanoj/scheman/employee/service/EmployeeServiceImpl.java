@@ -29,6 +29,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class EmployeeServiceImpl implements EmployeeService {
 
+    public static final String NOT_FOUND_EMPLOYEE_MESSAGE = "Not found employee with id: ";
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final EmployeeMapper employeeMapper;
@@ -86,7 +87,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     public EmployeeResponseDto updateEmployee(UUID employeeId, EmployeeUpdateRequestDto employeeUpdateRequestDto) {
         Employee employee = employeeRepository
                 .findByIdWithUser(employeeId)
-                .orElseThrow(()-> new ResourceNotFoundException("Not found employee with id: " + employeeId));
+                .orElseThrow(()-> new ResourceNotFoundException(NOT_FOUND_EMPLOYEE_MESSAGE + employeeId));
         User user = employee.getUser();
         employeeMapper.updateUserFromDto(employeeUpdateRequestDto, user);
         employeeMapper.updateEmployeeFromDto(employeeUpdateRequestDto, employee);
@@ -108,7 +109,9 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     @Transactional(readOnly = true)
     public EmployeeResponseDto findEmployeeById(UUID employeeId) {
-        Employee employee = employeeRepository.findByIdWithUser(employeeId).orElseThrow(()-> new ResourceNotFoundException("Not found employee with employeeId " + employeeId));
+        Employee employee = employeeRepository
+                .findByIdWithUser(employeeId)
+                .orElseThrow(()-> new ResourceNotFoundException(NOT_FOUND_EMPLOYEE_MESSAGE + employeeId));
         User user = employee.getUser();
         return employeeMapper.toResponseUserEmployeeDto(employee, user);
     }
@@ -118,7 +121,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     public void disableEmployeeById(UUID employeeId) {
         Employee employee = employeeRepository
                 .findByIdWithUser(employeeId)
-                .orElseThrow(()-> new ResourceNotFoundException("Not found employee with employeeId " + employeeId));
+                .orElseThrow(()-> new ResourceNotFoundException(NOT_FOUND_EMPLOYEE_MESSAGE + employeeId));
         User user = employee.getUser();
         user.setEnabled(false);
         userRepository.save(user);
@@ -130,7 +133,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     public void enableEmployeeById(UUID employeeId) {
         Employee employee = employeeRepository
                 .findByIdWithUser(employeeId)
-                .orElseThrow(()-> new ResourceNotFoundException("Not found employee with employeeId " + employeeId));
+                .orElseThrow(()-> new ResourceNotFoundException(NOT_FOUND_EMPLOYEE_MESSAGE + employeeId));
         User user = employee.getUser();
         user.setEnabled(true);
         userRepository.save(user);
