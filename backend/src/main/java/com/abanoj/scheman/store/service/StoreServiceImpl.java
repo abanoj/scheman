@@ -23,6 +23,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class StoreServiceImpl implements StoreService{
 
+    public static final String STORE_NOT_FOUND_MESSAGE = "Store not found with id ";
     private final StoreRepository storeRepository;
     private final StoreMapper storeMapper;
 
@@ -38,7 +39,7 @@ public class StoreServiceImpl implements StoreService{
     @Transactional(readOnly = true)
     public StoreResponseDto findStoreById(UUID id) {
         Store store = storeRepository.findWithShiftsByIdAndDeletedFalse(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Store not found with id " + id));
+                .orElseThrow(() -> new ResourceNotFoundException(STORE_NOT_FOUND_MESSAGE + id));
         return storeMapper.toResponseDto(store);
     }
 
@@ -55,7 +56,7 @@ public class StoreServiceImpl implements StoreService{
     @Transactional
     public StoreResponseDto updateStore(UUID id, StoreUpdateRequestDto storeUpdateRequestDto) {
         Store store = storeRepository.findWithShiftsByIdAndDeletedFalse(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Store not found with id " + id));
+                .orElseThrow(() -> new ResourceNotFoundException(STORE_NOT_FOUND_MESSAGE + id));
         storeMapper.updateStoreFromDto(storeUpdateRequestDto, store);
         storeRepository.save(store);
         log.debug("Updated store with id {}", store.getId());
@@ -66,7 +67,7 @@ public class StoreServiceImpl implements StoreService{
     @Transactional
     public void deleteStore(UUID id) {
         Store store = storeRepository.findWithShiftsByIdAndDeletedFalse(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Store not found with id " + id));
+                .orElseThrow(() -> new ResourceNotFoundException(STORE_NOT_FOUND_MESSAGE + id));
 
         if (!store.getShifts().isEmpty()) {
             throw new ConflictException("Cannot delete store with active shifts");
