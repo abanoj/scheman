@@ -11,6 +11,7 @@ API REST para la gestión de horarios de empleados en múltiples tiendas. Gestio
 - [Configuración](#configuración)
 - [Referencia de la API](#referencia-de-la-api)
 - [Tests](#tests)
+- [Próximas funcionalidades](#próximas-funcionalidades-rocket)
 
 ---
 
