@@ -1,6 +1,8 @@
 package com.abanoj.scheman.shift.service;
 
+import com.abanoj.scheman.auth.entity.User;
 import com.abanoj.scheman.exception.ResourceNotFoundException;
+import com.abanoj.scheman.shift.dto.ShiftCoverageSlotDto;
 import com.abanoj.scheman.shift.dto.ShiftCreateRequestDto;
 import com.abanoj.scheman.shift.dto.ShiftResponseDto;
 import com.abanoj.scheman.shift.dto.ShiftUpdateRequestDto;
@@ -8,6 +10,7 @@ import com.abanoj.scheman.shift.dto.UnassignedShiftResponseDto;
 import com.abanoj.scheman.shift.entity.Shift;
 import com.abanoj.scheman.shift.mapper.ShiftMapper;
 import com.abanoj.scheman.shift.repository.ShiftRepository;
+import com.abanoj.scheman.shiftassignment.entity.ShiftAssignment;
 import com.abanoj.scheman.shiftassignment.repository.ShiftAssignmentRepository;
 import com.abanoj.scheman.store.entity.Store;
 import com.abanoj.scheman.store.repository.StoreRepository;
@@ -120,6 +123,58 @@ public class ShiftServiceImpl implements ShiftService{
             }
         }
         return unassignedShift;
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<ShiftCoverageSlotDto> findWeeklyCoverage(UUID storeId, LocalDate date) {
+        LocalDate monday = date.with(DayOfWeek.MONDAY);
+        LocalDate sunday = date.with(DayOfWeek.SUNDAY);
+
+        List<Shift> activeShifts = shiftRepository.findActiveShiftsByStoreIdAndDateRange(storeId, monday, sunday);
+        if (activeShifts.isEmpty()) {
+            return List.of();
+        }
+
+        List<UUID> activeShiftIds = activeShifts.stream().map(Shift::getId).toList();
+        Map<String, ShiftAssignment> assignmentByKey = shiftAssignmentRepository
+                .findWithEmployeeByShiftIdInAndDateBetween(activeShiftIds, monday, sunday)
+                .stream()
+                .collect(Collectors.toMap(
+                        sa -> sa.getShift().getId() + ":" + sa.getDate(),
+                        sa -> sa,
+                        (first, second) -> first
+                ));
+
+        List<ShiftCoverageSlotDto> slots = new ArrayList<>();
+        for (Shift shift : activeShifts) {
+            for (LocalDate currentDate = monday; !currentDate.isAfter(sunday); currentDate = currentDate.plusDays(1)) {
+                if (!shift.getAvailableDays().contains(currentDate.getDayOfWeek())) continue;
+                if (currentDate.isBefore(shift.getEffectiveFrom())) continue;
+                if (shift.getEffectiveTo() != null && currentDate.isAfter(shift.getEffectiveTo())) continue;
+
+                ShiftAssignment assignment = assignmentByKey.get(shift.getId() + ":" + currentDate);
+                slots.add(toCoverageSlot(shift, currentDate, assignment));
+            }
+        }
+        return slots;
+    }
+
+    private ShiftCoverageSlotDto toCoverageSlot(Shift shift, LocalDate date, ShiftAssignment assignment) {
+        if (assignment == null) {
+            return new ShiftCoverageSlotDto(
+                    date, date.getDayOfWeek(), shift.getId(), shift.getName(), shift.getShiftType(),
+                    shift.getStartTime(), shift.getEndTime(), shift.isCrossesMidnight(),
+                    false, null, null, null
+            );
+        }
+        User user = assignment.getEmployee().getUser();
+        return new ShiftCoverageSlotDto(
+                date, date.getDayOfWeek(), shift.getId(), shift.getName(), shift.getShiftType(),
+                shift.getStartTime(), shift.getEndTime(), shift.isCrossesMidnight(),
+                true, assignment.getId(), assignment.getEmployee().getId(),
+                user.getFirstName() + " " + user.getLastName()
+        );
     }
 
     @Override

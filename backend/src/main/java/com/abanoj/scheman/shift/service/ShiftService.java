@@ -1,5 +1,6 @@
 package com.abanoj.scheman.shift.service;
 
+import com.abanoj.scheman.shift.dto.ShiftCoverageSlotDto;
 import com.abanoj.scheman.shift.dto.ShiftCreateRequestDto;
 import com.abanoj.scheman.shift.dto.ShiftResponseDto;
 import com.abanoj.scheman.shift.dto.ShiftUpdateRequestDto;
@@ -17,5 +18,6 @@ public interface ShiftService {
     ShiftResponseDto createShift(UUID storeId, ShiftCreateRequestDto shiftCreateRequestDto);
     ShiftResponseDto updateShift(UUID storeId, UUID id, ShiftUpdateRequestDto shiftUpdateRequestDto);
     List<UnassignedShiftResponseDto> findUnassignedShifts(UUID storeId, LocalDate date);
+    List<ShiftCoverageSlotDto> findWeeklyCoverage(UUID storeId, LocalDate date);
     void deleteShift(UUID storeId, UUID id);
 }

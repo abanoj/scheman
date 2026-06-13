@@ -1,6 +1,7 @@
 package com.abanoj.scheman.shift.controller;
 
 import com.abanoj.scheman.exception.ErrorResponse;
+import com.abanoj.scheman.shift.dto.ShiftCoverageSlotDto;
 import com.abanoj.scheman.shift.dto.ShiftCreateRequestDto;
 import com.abanoj.scheman.shift.dto.ShiftResponseDto;
 import com.abanoj.scheman.shift.dto.ShiftUpdateRequestDto;
@@ -62,6 +63,21 @@ public class ShiftController {
             @Parameter(description = "Store ID") @PathVariable UUID storeId,
             @Parameter(description = "Any date within the target week") @RequestParam LocalDate date) {
         return ResponseEntity.ok(shiftService.findUnassignedShifts(storeId, date));
+    }
+
+    @GetMapping("/coverage")
+    @PreAuthorize("hasAnyRole('ADMIN', 'MANAGER')")
+    @Operation(summary = "Get weekly coverage for a store", description = "Returns every shift slot (shift per applicable day) for the week, with its assignment status and assigned employee", responses = {
+            @ApiResponse(responseCode = "200", description = "Coverage retrieved successfully"),
+            @ApiResponse(responseCode = "401", description = "Not authenticated",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class))),
+            @ApiResponse(responseCode = "403", description = "Insufficient permissions",
+                    content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
+    })
+    public ResponseEntity<List<ShiftCoverageSlotDto>> getWeeklyCoverage(
+            @Parameter(description = "Store ID") @PathVariable UUID storeId,
+            @Parameter(description = "Any date within the target week") @RequestParam LocalDate date) {
+        return ResponseEntity.ok(shiftService.findWeeklyCoverage(storeId, date));
     }
 
     @GetMapping("/{id}")
