@@ -3,6 +3,7 @@ package com.abanoj.scheman.shiftassignment.service;
 import com.abanoj.scheman.shiftassignment.dto.ShiftAssignmentCreateRequestDto;
 import com.abanoj.scheman.shiftassignment.dto.ShiftAssignmentResponseDto;
 import com.abanoj.scheman.shiftassignment.dto.ShiftAssignmentUpdateRequestDto;
+import com.abanoj.scheman.shiftassignment.dto.WeeklyAssignmentResponseDto;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
@@ -16,6 +17,6 @@ public interface ShiftAssignmentService {
     ShiftAssignmentResponseDto findShiftAssignmentById(UUID shiftId, UUID id);
     ShiftAssignmentResponseDto createShiftAssignment(UUID shiftId, ShiftAssignmentCreateRequestDto shiftAssignmentCreateRequestDto);
     ShiftAssignmentResponseDto updateShiftAssignment(UUID shiftId, UUID id, ShiftAssignmentUpdateRequestDto shiftAssignmentUpdateRequestDto);
-    List<ShiftAssignmentResponseDto> findWeeklyAssignmentsByEmployee(UUID employeeId, LocalDate date);
+    List<WeeklyAssignmentResponseDto> findWeeklyAssignmentsByEmployee(UUID employeeId, LocalDate date);
     void delete(UUID shiftId, UUID id);
 }

@@ -1,7 +1,7 @@
 package com.abanoj.scheman.shiftassignment.controller;
 
 import com.abanoj.scheman.exception.ErrorResponse;
-import com.abanoj.scheman.shiftassignment.dto.ShiftAssignmentResponseDto;
+import com.abanoj.scheman.shiftassignment.dto.WeeklyAssignmentResponseDto;
 import com.abanoj.scheman.shiftassignment.service.ShiftAssignmentService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -38,7 +38,7 @@ public class EmployeeShiftAssignmentController {
                     @ApiResponse(responseCode = "404", description = "Employee not found",
                             content = @Content(schema = @Schema(implementation = ErrorResponse.class)))
             })
-    public ResponseEntity<List<ShiftAssignmentResponseDto>> getWeeklyShiftAssignmentsByEmployeeAndDates(
+    public ResponseEntity<List<WeeklyAssignmentResponseDto>> getWeeklyShiftAssignmentsByEmployeeAndDates(
             @Parameter(description = "Employee ID") @PathVariable UUID employeeId,
             @Parameter(description = "Any date within the desired week (yyyy-MM-dd)") @RequestParam LocalDate date){
         return ResponseEntity.ok(shiftAssignmentService.findWeeklyAssignmentsByEmployee(employeeId, date));

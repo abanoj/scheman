@@ -9,6 +9,7 @@ import com.abanoj.scheman.shift.repository.ShiftRepository;
 import com.abanoj.scheman.shiftassignment.dto.ShiftAssignmentCreateRequestDto;
 import com.abanoj.scheman.shiftassignment.dto.ShiftAssignmentResponseDto;
 import com.abanoj.scheman.shiftassignment.dto.ShiftAssignmentUpdateRequestDto;
+import com.abanoj.scheman.shiftassignment.dto.WeeklyAssignmentResponseDto;
 import com.abanoj.scheman.shiftassignment.entity.ShiftAssignment;
 import com.abanoj.scheman.shiftassignment.mapper.ShiftAssignmentMapper;
 import com.abanoj.scheman.shiftassignment.repository.ShiftAssignmentRepository;
@@ -62,6 +63,7 @@ public class ShiftAssignmentServiceImplTest {
     private Employee employee;
     private ShiftAssignment shiftAssignment;
     private ShiftAssignmentResponseDto shiftAssignmentResponseDto;
+    private WeeklyAssignmentResponseDto weeklyAssignmentResponseDto;
     private Pageable pageable;
 
     @BeforeEach
@@ -94,6 +96,20 @@ public class ShiftAssignmentServiceImplTest {
                 shiftAssignment.getDate(),
                 shiftAssignment.getEmployee().getId(),
                 shiftAssignment.getShift().getId()
+        );
+
+        weeklyAssignmentResponseDto = new WeeklyAssignmentResponseDto(
+                shiftAssignment.getId(),
+                shiftAssignment.getDate(),
+                shift.getId(),
+                shift.getName(),
+                shift.getStartTime(),
+                shift.getEndTime(),
+                shift.getShiftType(),
+                shift.isCrossesMidnight(),
+                shift.getTotalHours(),
+                null,
+                null
         );
     }
 
@@ -500,11 +516,11 @@ public class ShiftAssignmentServiceImplTest {
             //given
             given(employeeRepository.findById(employeeId)).willReturn(Optional.of(employee));
             given(shiftAssignmentRepository.findByEmployeeIdAndDateBetween(employeeId, monday, sunday)).willReturn(List.of(shiftAssignment));
-            given(shiftAssignmentMapper.toResponseDto(shiftAssignment)).willReturn(shiftAssignmentResponseDto);
+            given(shiftAssignmentMapper.toWeeklyResponseDto(shiftAssignment)).willReturn(weeklyAssignmentResponseDto);
             //when
-            List<ShiftAssignmentResponseDto> result = shiftAssignmentService.findWeeklyAssignmentsByEmployee(employeeId, date);
+            List<WeeklyAssignmentResponseDto> result = shiftAssignmentService.findWeeklyAssignmentsByEmployee(employeeId, date);
             //then
-            assertThat(result).containsExactly(shiftAssignmentResponseDto);
+            assertThat(result).containsExactly(weeklyAssignmentResponseDto);
         }
 
         @Test
@@ -513,7 +529,7 @@ public class ShiftAssignmentServiceImplTest {
             given(employeeRepository.findById(employeeId)).willReturn(Optional.of(employee));
             given(shiftAssignmentRepository.findByEmployeeIdAndDateBetween(employeeId, monday, sunday)).willReturn(List.of());
             //when
-            List<ShiftAssignmentResponseDto> result = shiftAssignmentService.findWeeklyAssignmentsByEmployee(employeeId, date);
+            List<WeeklyAssignmentResponseDto> result = shiftAssignmentService.findWeeklyAssignmentsByEmployee(employeeId, date);
             //then
             assertThat(result).isEmpty();
         }

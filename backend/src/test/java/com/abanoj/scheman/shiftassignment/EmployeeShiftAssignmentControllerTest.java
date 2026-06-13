@@ -5,7 +5,8 @@ import com.abanoj.scheman.config.RateLimitProperties;
 import com.abanoj.scheman.exception.ResourceNotFoundException;
 import com.abanoj.scheman.security.JwtService;
 import com.abanoj.scheman.shiftassignment.controller.EmployeeShiftAssignmentController;
-import com.abanoj.scheman.shiftassignment.dto.ShiftAssignmentResponseDto;
+import com.abanoj.scheman.shiftassignment.dto.WeeklyAssignmentResponseDto;
+import com.abanoj.scheman.shift.entity.ShiftType;
 import com.abanoj.scheman.shiftassignment.service.ShiftAssignmentService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -19,6 +20,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -70,8 +72,11 @@ class EmployeeShiftAssignmentControllerTest {
         void shouldReturnWeeklyAssignments_whenTheyExist() throws Exception {
             //given
             LocalDate date = LocalDate.of(2026, 6, 1);
-            ShiftAssignmentResponseDto responseDto = new ShiftAssignmentResponseDto(
-                    assignmentId, LocalDate.of(2026, 6, 2), employeeId, shiftId
+            UUID storeId = UUID.randomUUID();
+            WeeklyAssignmentResponseDto responseDto = new WeeklyAssignmentResponseDto(
+                    assignmentId, LocalDate.of(2026, 6, 2), shiftId, "Morning",
+                    LocalTime.of(7, 0), LocalTime.of(15, 0), ShiftType.MORNING,
+                    false, 8.0, storeId, "San Blas"
             );
             given(shiftAssignmentService.findWeeklyAssignmentsByEmployee(eq(employeeId), eq(date)))
                     .willReturn(List.of(responseDto));
@@ -82,8 +87,9 @@ class EmployeeShiftAssignmentControllerTest {
                     .andExpect(status().isOk())
                     .andExpect(jsonPath("$[0].id").value(assignmentId.toString()))
                     .andExpect(jsonPath("$[0].date").value("2026-06-02"))
-                    .andExpect(jsonPath("$[0].employeeId").value(employeeId.toString()))
-                    .andExpect(jsonPath("$[0].shiftId").value(shiftId.toString()));
+                    .andExpect(jsonPath("$[0].shiftId").value(shiftId.toString()))
+                    .andExpect(jsonPath("$[0].shiftName").value("Morning"))
+                    .andExpect(jsonPath("$[0].storeName").value("San Blas"));
         }
 
         @Test

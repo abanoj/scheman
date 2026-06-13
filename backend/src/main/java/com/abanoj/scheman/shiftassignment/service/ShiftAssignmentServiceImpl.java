@@ -9,6 +9,7 @@ import com.abanoj.scheman.shift.repository.ShiftRepository;
 import com.abanoj.scheman.shiftassignment.dto.ShiftAssignmentCreateRequestDto;
 import com.abanoj.scheman.shiftassignment.dto.ShiftAssignmentResponseDto;
 import com.abanoj.scheman.shiftassignment.dto.ShiftAssignmentUpdateRequestDto;
+import com.abanoj.scheman.shiftassignment.dto.WeeklyAssignmentResponseDto;
 import com.abanoj.scheman.shiftassignment.entity.ShiftAssignment;
 import com.abanoj.scheman.shiftassignment.mapper.ShiftAssignmentMapper;
 import com.abanoj.scheman.shiftassignment.repository.ShiftAssignmentRepository;
@@ -106,7 +107,7 @@ public class ShiftAssignmentServiceImpl implements ShiftAssignmentService{
 
     @Override
     @Transactional(readOnly = true)
-    public List<ShiftAssignmentResponseDto> findWeeklyAssignmentsByEmployee(UUID employeeId, LocalDate date){
+    public List<WeeklyAssignmentResponseDto> findWeeklyAssignmentsByEmployee(UUID employeeId, LocalDate date){
         employeeRepository
                 .findById(employeeId)
                 .orElseThrow(() -> new ResourceNotFoundException(NOT_FOUND_EMPLOYEE_MESSAGE + employeeId));
@@ -116,7 +117,7 @@ public class ShiftAssignmentServiceImpl implements ShiftAssignmentService{
         return shiftAssignmentRepository
                 .findByEmployeeIdAndDateBetween(employeeId, monday, sunday)
                 .stream()
-                .map(shiftAssignmentMapper::toResponseDto)
+                .map(shiftAssignmentMapper::toWeeklyResponseDto)
                 .toList();
     }
 
