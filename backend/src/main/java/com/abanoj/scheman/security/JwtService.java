@@ -1,5 +1,6 @@
 package com.abanoj.scheman.security;
 
+import com.abanoj.scheman.auth.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
@@ -22,9 +24,17 @@ public class JwtService {
     private static final String CLAIM_TYPE = "type";
     private static final String TYPE_ACCESS = "access";
     private static final String TYPE_REFRESH = "refresh";
+    private static final String CLAIM_ROLE = "role";
+    private static final String CLAIM_ID = "id";
 
     public String generateAccessToken(UserDetails userDetails) {
-        return buildToken(Map.of(CLAIM_TYPE, TYPE_ACCESS), userDetails, jwtProperties.getExpiration());
+        Map<String, Object> claims = new HashMap<>();
+        claims.put(CLAIM_TYPE, TYPE_ACCESS);
+        if (userDetails instanceof User user) {
+            claims.put(CLAIM_ID, user.getId().toString());
+            claims.put(CLAIM_ROLE, user.getRole().name());
+        }
+        return buildToken(claims, userDetails, jwtProperties.getExpiration());
     }
 
     public String generateRefreshToken(UserDetails userDetails) {
