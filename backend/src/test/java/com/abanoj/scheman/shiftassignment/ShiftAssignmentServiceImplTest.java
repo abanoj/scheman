@@ -95,7 +95,8 @@ public class ShiftAssignmentServiceImplTest {
                 shiftAssignment.getId(),
                 shiftAssignment.getDate(),
                 shiftAssignment.getEmployee().getId(),
-                shiftAssignment.getShift().getId()
+                shiftAssignment.getShift().getId(),
+                null
         );
 
         weeklyAssignmentResponseDto = new WeeklyAssignmentResponseDto(
@@ -375,7 +376,8 @@ public class ShiftAssignmentServiceImplTest {
                     id,
                     shiftAssignment.getDate().plusDays(1),
                     shiftAssignment.getEmployee().getId(),
-                    shiftAssignment.getShift().getId()
+                    shiftAssignment.getShift().getId(),
+                    null
             );
         }
 

@@ -78,7 +78,8 @@ class ShiftAssignmentControllerTest {
                 assignmentId,
                 LocalDate.of(2026, 6, 2),
                 employeeId,
-                shiftId
+                shiftId,
+                null
         );
     }
 
@@ -274,7 +275,7 @@ class ShiftAssignmentControllerTest {
         void shouldUpdateAssignment_whenRequestIsValid() throws Exception {
             //given
             ShiftAssignmentResponseDto updatedResponse = new ShiftAssignmentResponseDto(
-                    assignmentId, LocalDate.of(2026, 6, 3), employeeId, shiftId
+                    assignmentId, LocalDate.of(2026, 6, 3), employeeId, shiftId, null
             );
             given(shiftAssignmentService.updateShiftAssignment(eq(shiftId), eq(assignmentId), any(ShiftAssignmentUpdateRequestDto.class)))
                     .willReturn(updatedResponse);

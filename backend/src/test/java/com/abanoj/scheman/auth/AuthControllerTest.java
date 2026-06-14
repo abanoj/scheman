@@ -115,7 +115,8 @@ public class AuthControllerTest {
                     managerId,
                     "Jesus",
                     "Abano",
-                    "jesus@abanoj.com"
+                    "jesus@abanoj.com",
+                    true
             );
             given(authService.createManager(request)).willReturn(response);
             //when -> then
