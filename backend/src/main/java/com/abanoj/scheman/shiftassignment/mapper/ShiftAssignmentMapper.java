@@ -13,6 +13,7 @@ import org.mapstruct.MappingTarget;
 public interface ShiftAssignmentMapper {
     @Mapping(source = "employee.id", target = "employeeId")
     @Mapping(source = "shift.id", target = "shiftId")
+    @Mapping(target = "warning", ignore = true)
     ShiftAssignmentResponseDto toResponseDto(ShiftAssignment shiftAssignment);
 
     @Mapping(source = "shift.id", target = "shiftId")

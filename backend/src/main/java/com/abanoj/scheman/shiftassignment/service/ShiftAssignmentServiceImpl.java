@@ -25,6 +25,7 @@ import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -79,7 +80,9 @@ public class ShiftAssignmentServiceImpl implements ShiftAssignmentService{
         shiftAssignment.setEmployee(employee);
         shiftAssignmentRepository.save(shiftAssignment);
         log.debug("Created Shift Assignment with id {}", shiftAssignment.getId());
-        return shiftAssignmentMapper.toResponseDto(shiftAssignment);
+        String warning = checkWeeklyHours(employeeId, employee, shiftAssignmentCreateRequestDto.date(), shift, null).orElse(null);
+        ShiftAssignmentResponseDto base = shiftAssignmentMapper.toResponseDto(shiftAssignment);
+        return new ShiftAssignmentResponseDto(base.id(), base.date(), base.employeeId(), base.shiftId(), warning);
     }
 
     @Override
@@ -102,7 +105,9 @@ public class ShiftAssignmentServiceImpl implements ShiftAssignmentService{
         shiftAssignment.setEmployee(employee);
         shiftAssignmentRepository.save(shiftAssignment);
         log.debug("Updated Shift Assignment with id {}", shiftAssignment.getId());
-        return shiftAssignmentMapper.toResponseDto(shiftAssignment);
+        String warning = checkWeeklyHours(employeeId, employee, shiftAssignmentUpdateRequestDto.date(), shift, id).orElse(null);
+        ShiftAssignmentResponseDto base = shiftAssignmentMapper.toResponseDto(shiftAssignment);
+        return new ShiftAssignmentResponseDto(base.id(), base.date(), base.employeeId(), base.shiftId(), warning);
     }
 
     @Override
@@ -129,6 +134,29 @@ public class ShiftAssignmentServiceImpl implements ShiftAssignmentService{
         }
         shiftAssignmentRepository.deleteById(id);
         log.debug("Deleted Shift Assignment {}", id);
+    }
+
+    private Optional<String> checkWeeklyHours(UUID employeeId, Employee employee, LocalDate date, Shift newShift, UUID excludeAssignmentId) {
+        if (employee.getWeeklyContractedHours() == null) return Optional.empty();
+
+        LocalDate monday = date.with(DayOfWeek.MONDAY);
+        LocalDate sunday = date.with(DayOfWeek.SUNDAY);
+
+        double assignedHours = shiftAssignmentRepository
+                .findByEmployeeIdAndDateBetween(employeeId, monday, sunday)
+                .stream()
+                .filter(a -> excludeAssignmentId == null || !excludeAssignmentId.equals(a.getId()))
+                .mapToDouble(a -> a.getShift().getTotalHours())
+                .sum();
+
+        double totalHours = assignedHours + newShift.getTotalHours();
+        if (totalHours > employee.getWeeklyContractedHours()) {
+            return Optional.of(String.format(
+                    "Horas semanales superadas: %.1fh asignadas / %dh contratadas",
+                    totalHours, employee.getWeeklyContractedHours()
+            ));
+        }
+        return Optional.empty();
     }
 
     private void validateNoOverlap(UUID employeeId, LocalDate date, Shift newShift, UUID excludeAssignmentId) {

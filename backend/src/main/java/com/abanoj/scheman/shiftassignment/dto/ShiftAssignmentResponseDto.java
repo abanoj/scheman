@@ -13,6 +13,8 @@ public record ShiftAssignmentResponseDto(
         @Schema(description = "Employee ID", example = "f47ac10b-58cc-4372-a567-0e02b2c3d479")
         UUID employeeId,
         @Schema(description = "Shift ID", example = "f47ac10b-58cc-4372-a567-0e02b2c3d479")
-        UUID shiftId
+        UUID shiftId,
+        @Schema(description = "Non-blocking warning, e.g. weekly hours exceeded", nullable = true)
+        String warning
 ) {
 }
