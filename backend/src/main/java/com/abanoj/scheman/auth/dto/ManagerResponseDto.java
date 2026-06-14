@@ -12,5 +12,7 @@ public record ManagerResponseDto(
         @Schema(description = "Last name", example = "Doe")
         String lastName,
         @Schema(description = "Email address", example = "john@doe.com")
-        String email) {
+        String email,
+        @Schema(description = "Whether the manager account is active")
+        boolean enabled) {
 }
