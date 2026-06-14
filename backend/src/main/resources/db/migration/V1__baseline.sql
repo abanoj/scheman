@@ -31,7 +31,7 @@ CREATE TABLE IF NOT EXISTS public.employee_store (
 );
 
 
-ALTER TABLE public.employee_store OWNER TO root;
+ALTER TABLE public.employee_store OWNER TO CURRENT_USER;
 
 --
 -- Name: employees; Type: TABLE; Schema: public; Owner: root
@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS public.employees (
 );
 
 
-ALTER TABLE public.employees OWNER TO root;
+ALTER TABLE public.employees OWNER TO CURRENT_USER;
 
 
 --
@@ -66,7 +66,7 @@ CREATE TABLE IF NOT EXISTS public.refresh_tokens (
 );
 
 
-ALTER TABLE public.refresh_tokens OWNER TO root;
+ALTER TABLE public.refresh_tokens OWNER TO CURRENT_USER;
 
 --
 -- Name: shift_assignments; Type: TABLE; Schema: public; Owner: root
@@ -82,7 +82,7 @@ CREATE TABLE IF NOT EXISTS public.shift_assignments (
 );
 
 
-ALTER TABLE public.shift_assignments OWNER TO root;
+ALTER TABLE public.shift_assignments OWNER TO CURRENT_USER;
 
 --
 -- Name: shift_available_days; Type: TABLE; Schema: public; Owner: root
@@ -95,7 +95,7 @@ CREATE TABLE IF NOT EXISTS public.shift_available_days (
 );
 
 
-ALTER TABLE public.shift_available_days OWNER TO root;
+ALTER TABLE public.shift_available_days OWNER TO CURRENT_USER;
 
 --
 -- Name: shifts; Type: TABLE; Schema: public; Owner: root
@@ -118,7 +118,7 @@ CREATE TABLE IF NOT EXISTS public.shifts (
 );
 
 
-ALTER TABLE public.shifts OWNER TO root;
+ALTER TABLE public.shifts OWNER TO CURRENT_USER;
 
 --
 -- Name: stores; Type: TABLE; Schema: public; Owner: root
@@ -136,7 +136,7 @@ CREATE TABLE IF NOT EXISTS public.stores (
 );
 
 
-ALTER TABLE public.stores OWNER TO root;
+ALTER TABLE public.stores OWNER TO CURRENT_USER;
 
 --
 -- Name: users; Type: TABLE; Schema: public; Owner: root
@@ -157,7 +157,7 @@ CREATE TABLE IF NOT EXISTS public.users (
 );
 
 
-ALTER TABLE public.users OWNER TO root;
+ALTER TABLE public.users OWNER TO CURRENT_USER;
 
 --
 -- Name: employee_store employee_store_pkey; Type: CONSTRAINT; Schema: public; Owner: root
