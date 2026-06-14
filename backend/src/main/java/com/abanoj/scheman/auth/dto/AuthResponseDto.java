@@ -7,7 +7,6 @@ public record AuthResponseDto(
         String accessToken,
         @JsonProperty("refresh_token")
         String refreshToken,
-        @JsonProperty("must_change_password")
         boolean mustChangePassword
 ) {
 }
