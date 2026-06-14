@@ -1,9 +1,10 @@
-# SchemanApp — API de Gestión de Horarios
+# Scheman — API de Gestión de Horarios
 
-API REST para la gestión de horarios de empleados en múltiples tiendas. Gestiona empleados, tiendas, turnos y asignaciones de turno con control de acceso basado en roles. Permite compartir empleados entre las distintas sucursales. Respetando tiempos de desanso y horas de contrato.
+API REST para la gestión de horarios de empleados en múltiples tiendas. Gestiona empleados, tiendas, turnos y asignaciones con control de acceso basado en roles, validaciones de negocio (descanso mínimo entre turnos, horas contratadas semanales) y una vista de cobertura semanal por tienda.
 
 ## Tabla de Contenidos
 
+- [Demo](#demo)
 - [Características](#características)
 - [Tecnologías](#tecnologías)
 - [Arquitectura](#arquitectura)
@@ -15,17 +16,32 @@ API REST para la gestión de horarios de empleados en múltiples tiendas. Gestio
 
 ---
 
+## Demo
+
+> Los datos de demo se reinician automáticamente cada 6 horas.
+
+| Rol | Email | Contraseña |
+|---|---|---|
+| Admin | `admin@demo.com` | `Demo@2026` |
+| Manager | `manager@demo.com` | `Demo@2026` |
+| Empleado | `empleado@demo.com` | `Demo@2026` |
+
+---
+
 ## Características
 
-- **Autenticación JWT** — con access y refresh token sin estado con rotación; los refresh tokens se almacenan en BD y se revocan al reutilizarse
-- **Control de acceso por roles** — roles jerárquicos: `ADMIN` > `MANAGER` > `EMPLOYEE`, aplicados por endpoint con `@PreAuthorize`
-- **Gestión de empleados** — CRUD con habilitación/deshabilitación de cuenta, tiendas preferidas y horas contratadas semanales
-- **Gestión de turnos** — turnos por tienda con tipo (MAÑANA / TARDE / NOCHE), días disponibles y rango de fechas de vigencia
-- **Asignaciones de turno** — asignar empleados a turnos con validación de solapamiento y vista de horario semanal
-- **Rate limiting** — endpoint de login limitado a 5 intentos por 15 minutos por IP (Bucket4j + Caffeine)
-- **Borrado lógico** — tiendas filtradas automáticamente mediante `@SQLRestriction`; borrados físicos protegidos por comprobaciones de integridad referencial
-- **Migraciones de base de datos** — esquema versionado con Flyway
-- **Documentación OpenAPI** — Swagger UI disponible en el perfil de desarrollo
+- **Autenticación JWT** — access token en memoria (15 min) y refresh token rotativo almacenado en BD (7 días); revocación automática en cada nuevo login
+- **Control de acceso por roles** — jerarquía `ADMIN` > `MANAGER` > `EMPLOYEE` aplicada por endpoint con `@PreAuthorize`
+- **Gestión de managers** — CRUD exclusivo para ADMIN con habilitación/deshabilitación de cuenta
+- **Gestión de empleados** — CRUD con vinculación a tiendas, turno preferente y horas contratadas semanales
+- **Gestión de turnos** — por tienda con tipo (MORNING/AFTERNOON/NIGHT), días disponibles y rango de vigencia; soporte de turnos nocturnos que cruzan la medianoche
+- **Asignaciones de turno** — validación de turno único por día y descanso mínimo de 12 horas entre turnos consecutivos
+- **Aviso de horas semanales** — si una asignación supera las horas contratadas, la respuesta incluye un campo `warning` no bloqueante
+- **Cobertura semanal** — endpoint que devuelve el estado de cobertura (asignado/sin asignar) de todos los turnos activos de una tienda para una semana
+- **Rate limiting** — login limitado a 10 intentos por 5 minutos por IP (Bucket4j + Caffeine)
+- **Borrado lógico** — tiendas filtradas automáticamente con `@SQLRestriction`
+- **Demo mode** — seed automático al arrancar y reset periódico cada 6 horas vía `@Scheduled`
+- **Documentación OpenAPI** — Swagger UI disponible en el perfil de desarrollo (`/docs`)
 
 ---
 
@@ -41,7 +57,6 @@ API REST para la gestión de horarios de empleados en múltiples tiendas. Gestio
 | Rate Limiting | Bucket4j 8.10.1 + Caffeine |
 | Documentación | SpringDoc OpenAPI 2.8.16 |
 | Tests | JUnit 5, Mockito, H2 |
-| Calidad de código | JaCoCo, SonarCloud |
 | Infraestructura | Docker, Docker Compose |
 
 ---
@@ -51,11 +66,12 @@ API REST para la gestión de horarios de empleados en múltiples tiendas. Gestio
 Organización por funcionalidades bajo `com.abanoj.scheman`:
 
 ```
-auth/              Auth JWT — login, refresco, logout, registro de manager, cambio de contraseña
+auth/              JWT — login, refresco, logout, registro de manager, cambio de contraseña
 employee/          CRUD de empleados, vinculación con tiendas, habilitación/deshabilitación
 store/             CRUD de tiendas con borrado lógico
-shift/             Gestión de turnos por tienda
-shiftassignment/   Asignación de turnos a empleados, vista de horario semanal
+shift/             Turnos por tienda con cobertura semanal
+shiftassignment/   Asignaciones con validación de solapamiento y aviso de horas
+demo/              Seed y reset automático de datos de demostración
 config/            Seguridad, CORS, rate limiting, auditoría JPA, OpenAPI
 security/          Filtro JWT, servicio de tokens, entry points
 exception/         GlobalExceptionHandler con DTO ErrorResponse
@@ -69,17 +85,16 @@ controller/   Endpoints REST (/api/v1/...) con @PreAuthorize
 service/      Interfaz + *Impl con @Transactional
 repository/   Repositorios Spring Data JPA
 entity/       Entidades JPA que extienden BaseEntity
-dto/          Records separados para operaciones de Create, Update y Response
-mapper/       Interfaces MapStruct — implementaciones generadas en tiempo de compilación
+dto/          Records para Create, Update y Response
+mapper/       Interfaces MapStruct generadas en compilación
 ```
 
 **Decisiones de diseño relevantes:**
 
-- `Employee` comparte su clave primaria UUID con `User` mediante `@MapsId` — una sola identidad, dos responsabilidades
-- La contraseña inicial del empleado se establece con su DNI y `mustChangePassword = true`
+- `Employee` comparte su PK UUID con `User` mediante `@MapsId` — una sola identidad, dos responsabilidades
+- La contraseña inicial del empleado es su DNI con `mustChangePassword = true`
 - Los refresh tokens se almacenan en BD; un nuevo login revoca todos los tokens existentes del usuario
-- Los DTOs son records de Java con anotaciones de validación Jakarta
-- `@Builder.Default` en campos de entidad con inicializadores para evitar conflictos con Lombok
+- El campo `warning` en `ShiftAssignmentResponseDto` transporta avisos no bloqueantes (horas superadas) sin interrumpir el flujo
 
 ---
 
@@ -89,7 +104,6 @@ mapper/       Interfaces MapStruct — implementaciones generadas en tiempo de c
 
 - Java 17+
 - Docker y Docker Compose
-- Maven (o usar el wrapper incluido)
 
 ### 1. Clonar el repositorio
 
@@ -155,36 +169,46 @@ Arranca PostgreSQL y la aplicación Spring Boot en perfil de producción (Swagge
 
 **Perfiles:**
 
-| Perfil | DDL | Flyway | Swagger | Logging |
+| Perfil | DDL | Flyway | Swagger | Demo |
 |---|---|---|---|---|
-| `dev` | `create-drop` | Desactivado | Activado en `/docs` | DEBUG |
-| `test` | H2 en memoria | Desactivado | — | — |
-| `prod` | `validate` | Activado | Desactivado | INFO/WARN |
+| `dev` | `update` | Desactivado | `/docs` | Activado |
+| `test` | H2 en memoria | Desactivado | — | Desactivado |
+| `prod` | `validate` | Activado | Desactivado | Desactivado |
 
 ---
 
 ## Referencia de la API
 
-Todos los endpoints tienen el prefijo `/api/v1`. Documentación interactiva completa disponible en Swagger UI con el perfil de desarrollo.
+Todos los endpoints tienen el prefijo `/api/v1`. Documentación interactiva completa en Swagger UI con el perfil de desarrollo.
 
 ### Autenticación
 
 | Método | Endpoint | Acceso | Descripción |
 |---|---|---|---|
-| `POST` | `/auth/login` | Público | Obtener par de tokens de acceso y refresco |
-| `POST` | `/auth/refresh` | Público | Rotar refresh token y obtener nuevo par |
+| `POST` | `/auth/login` | Público | Obtener par de tokens |
+| `POST` | `/auth/refresh` | Público | Rotar refresh token |
 | `POST` | `/auth/logout` | Público | Revocar refresh token |
-| `POST` | `/auth/signup/manager` | ADMIN | Crear una nueva cuenta de manager |
+| `POST` | `/auth/signup/manager` | ADMIN | Crear cuenta de manager |
 | `PATCH` | `/auth/{userId}/password` | Solo propietario | Cambiar contraseña propia |
+
+### Managers
+
+| Método | Endpoint | Acceso | Descripción |
+|---|---|---|---|
+| `GET` | `/managers` | ADMIN | Listar managers (paginado) |
+| `GET` | `/managers/{id}` | ADMIN | Obtener por ID |
+| `PATCH` | `/managers/{id}` | ADMIN | Actualizar nombre |
+| `PATCH` | `/managers/{id}/enable` | ADMIN | Habilitar cuenta |
+| `PATCH` | `/managers/{id}/disable` | ADMIN | Deshabilitar cuenta |
 
 ### Empleados
 
 | Método | Endpoint | Acceso | Descripción |
 |---|---|---|---|
-| `GET` | `/employees` | ADMIN, MANAGER | Listar todos los empleados (paginado) |
-| `POST` | `/employees` | ADMIN, MANAGER | Registrar nuevo empleado |
-| `GET` | `/employees/me` | Autenticado | Obtener perfil propio |
-| `GET` | `/employees/{id}` | ADMIN, MANAGER | Obtener empleado por ID |
+| `GET` | `/employees` | ADMIN, MANAGER | Listar empleados (paginado) |
+| `POST` | `/employees` | ADMIN, MANAGER | Registrar empleado |
+| `GET` | `/employees/me` | Autenticado | Perfil propio |
+| `GET` | `/employees/{id}` | ADMIN, MANAGER | Obtener por ID |
 | `PATCH` | `/employees/{id}` | ADMIN, MANAGER | Actualizar empleado |
 | `PATCH` | `/employees/{id}/enable` | ADMIN, MANAGER | Habilitar cuenta |
 | `PATCH` | `/employees/{id}/disable` | ADMIN, MANAGER | Deshabilitar cuenta |
@@ -193,33 +217,34 @@ Todos los endpoints tienen el prefijo `/api/v1`. Documentación interactiva comp
 
 | Método | Endpoint | Acceso | Descripción |
 |---|---|---|---|
-| `GET` | `/stores` | ADMIN, MANAGER | Listar todas las tiendas (paginado) |
+| `GET` | `/stores` | ADMIN, MANAGER | Listar tiendas (paginado) |
 | `POST` | `/stores` | ADMIN, MANAGER | Crear tienda |
-| `GET` | `/stores/{id}` | ADMIN, MANAGER | Obtener tienda por ID |
+| `GET` | `/stores/{id}` | ADMIN, MANAGER | Obtener por ID |
 | `PATCH` | `/stores/{id}` | ADMIN, MANAGER | Actualizar tienda |
-| `DELETE` | `/stores/{id}` | ADMIN, MANAGER | Borrado lógico de tienda |
+| `DELETE` | `/stores/{id}` | ADMIN, MANAGER | Borrado lógico |
 
 ### Turnos
 
 | Método | Endpoint | Acceso | Descripción |
 |---|---|---|---|
-| `GET` | `/stores/{storeId}/shifts` | ADMIN, MANAGER | Listar turnos de una tienda (paginado) |
+| `GET` | `/stores/{storeId}/shifts` | ADMIN, MANAGER | Listar turnos de una tienda |
 | `POST` | `/stores/{storeId}/shifts` | ADMIN, MANAGER | Crear turno |
-| `GET` | `/stores/{storeId}/shifts/{id}` | ADMIN, MANAGER | Obtener turno por ID |
+| `GET` | `/stores/{storeId}/shifts/{id}` | ADMIN, MANAGER | Obtener por ID |
 | `PUT` | `/stores/{storeId}/shifts/{id}` | ADMIN, MANAGER | Reemplazar turno |
 | `DELETE` | `/stores/{storeId}/shifts/{id}` | ADMIN, MANAGER | Eliminar turno |
-| `GET` | `/stores/{storeId}/shifts/unassigned` | ADMIN, MANAGER | Turnos sin asignar de una semana (`?date=`) |
+| `GET` | `/stores/{storeId}/shifts/unassigned` | ADMIN, MANAGER | Turnos sin cubrir (`?date=`) |
+| `GET` | `/stores/{storeId}/shifts/coverage` | ADMIN, MANAGER | Cobertura semanal (`?date=`) |
 
 ### Asignaciones de Turno
 
 | Método | Endpoint | Acceso | Descripción |
 |---|---|---|---|
-| `GET` | `/shifts/{shiftId}/shift-assignments` | ADMIN, MANAGER | Listar asignaciones de un turno (paginado) |
+| `GET` | `/shifts/{shiftId}/shift-assignments` | ADMIN, MANAGER | Listar asignaciones (paginado) |
 | `POST` | `/shifts/{shiftId}/shift-assignments` | ADMIN, MANAGER | Crear asignación |
-| `GET` | `/shifts/{shiftId}/shift-assignments/{id}` | ADMIN, MANAGER | Obtener asignación por ID |
+| `GET` | `/shifts/{shiftId}/shift-assignments/{id}` | ADMIN, MANAGER | Obtener por ID |
 | `PUT` | `/shifts/{shiftId}/shift-assignments/{id}` | ADMIN, MANAGER | Actualizar asignación |
 | `DELETE` | `/shifts/{shiftId}/shift-assignments/{id}` | ADMIN, MANAGER | Eliminar asignación |
-| `GET` | `/shifts/{shiftId}/shift-assignments/employee/{employeeId}` | ADMIN, MANAGER, Propietario | Asignaciones por empleado |
+| `GET` | `/shifts/{shiftId}/shift-assignments/employee/{employeeId}` | ADMIN, MANAGER, Propietario | Por empleado |
 | `GET` | `/shift-assignments/employees/{employeeId}/weekly` | ADMIN, MANAGER, Propietario | Horario semanal (`?date=`) |
 
 ---
@@ -242,23 +267,25 @@ backend/mvnw.cmd -f backend/pom.xml verify
 | Capa | Anotación | Qué verifica |
 |---|---|---|
 | Controlador | `@WebMvcTest` | Capa HTTP, validación de requests, forma de la respuesta |
-| Seguridad | `@WebMvcTest` (clase `*SecurityTest` separada) | 403 por roles en cada endpoint |
+| Seguridad | `@WebMvcTest` (clase `*SecurityTest`) | 403 por rol en cada endpoint |
 | Servicio | `@ExtendWith(MockitoExtension.class)` | Lógica de negocio y validaciones |
 | Repositorio | `@DataJpaTest` | Consultas, restricciones, borrado lógico |
 
 El informe de cobertura se genera en `backend/target/site/jacoco/index.html` tras ejecutar `mvn verify`.
 
+---
+
 ## Próximas funcionalidades :rocket:
 
 ### Corto plazo
-- [ ] Pedido de cambio de turno por parte de `Employee`.
-- [ ] Solicitud de día libre por parte de `Employee`.
-- [ ] Asignación de vacaciones por parte de un `MANAGER`.
+- [ ] Pedido de cambio de turno por parte de `EMPLOYEE`
+- [ ] Solicitud de día libre por parte de `EMPLOYEE`
+- [ ] Asignación de vacaciones por parte de un `MANAGER`
 
 ### Medio plazo
-- [ ] Integración con OAuth2 (Google/GitHub)
+- [ ] Integración con OAuth2 (Google / GitHub)
+- [ ] Notificaciones por email al asignar un turno
 
 ### Largo plazo
-- [ ] Creación del rol de encargado de sucursal y sus funcionalidades.
-- [ ] Solicitud de pedidos y devoluciones por sucursal.
-- [ ] Otras ideas futuras...
+- [ ] Rol de encargado de sucursal con funcionalidades propias
+- [ ] Solicitud de pedidos y devoluciones por sucursal
