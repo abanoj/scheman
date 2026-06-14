@@ -18,7 +18,10 @@ API REST para la gestión de horarios de empleados en múltiples tiendas. Gestio
 
 ## Demo
 
+🔗 **[https://scheman-ui.onrender.com](https://scheman-ui.onrender.com)**
+
 > Los datos de demo se reinician automáticamente cada 6 horas.
+> El servicio está en Render free tier — si lleva un rato inactivo puede tardar ~30 segundos en despertar.
 
 | Rol | Email | Contraseña |
 |---|---|---|
@@ -144,6 +147,8 @@ backend/mvnw.cmd -f backend/pom.xml spring-boot:run
 
 La API estará disponible en `http://localhost:8080`.
 Swagger UI en `http://localhost:8080/docs`.
+
+> **Producción:** `https://scheman.onrender.com`
 
 ### Ejecución completa con Docker Compose
 
