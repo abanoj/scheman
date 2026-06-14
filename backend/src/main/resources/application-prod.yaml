@@ -47,6 +47,9 @@ application:
   admin:
     email: ${ADMIN_EMAIL}
     password: ${ADMIN_PASSWORD}
+  demo:
+    enabled: true
+    reset-cron: "0 0 */6 * * *"
 ## Swagger
 springdoc:
   api-docs:
