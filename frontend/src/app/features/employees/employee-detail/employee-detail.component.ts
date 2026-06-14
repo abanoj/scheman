@@ -199,6 +199,16 @@ const DAY_LABELS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
       gap: 20px;
       max-width: 960px;
     }
+    @media (max-width: 768px) {
+      .detail-layout { grid-template-columns: 1fr; }
+      .profile-actions { margin-left: 0; flex-wrap: wrap; }
+      .schedule-section { margin-top: 16px; }
+      .calendar { grid-template-columns: repeat(2, 1fr) !important; }
+      .week-range { font-size: 0.8rem; }
+    }
+    @media (max-width: 480px) {
+      .calendar { grid-template-columns: 1fr !important; }
+    }
 
     .profile-header { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
 

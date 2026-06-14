@@ -1,4 +1,4 @@
-import { Component, computed, inject } from '@angular/core';
+import { Component, computed, inject, Output, EventEmitter } from '@angular/core';
 import { RouterLink, RouterLinkActive } from '@angular/router';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDividerModule } from '@angular/material/divider';
@@ -41,6 +41,7 @@ const NAV_ITEMS: NavItem[] = [
           routerLinkActive="active"
           [routerLinkActiveOptions]="{ exact: item.route === '/dashboard' }"
           class="nav-item"
+          (click)="itemClicked.emit()"
         >
           <mat-icon class="nav-icon">{{ item.icon }}</mat-icon>
           <span class="nav-label">{{ item.label }}</span>
@@ -82,6 +83,8 @@ const NAV_ITEMS: NavItem[] = [
   `],
 })
 export class SidebarComponent {
+  @Output() itemClicked = new EventEmitter<void>();
+
   private readonly tokenService = inject(TokenService);
 
   readonly visibleItems = computed(() => {

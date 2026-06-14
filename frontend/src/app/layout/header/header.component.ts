@@ -1,4 +1,4 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, Input, Output, EventEmitter } from '@angular/core';
 import { MatToolbarModule } from '@angular/material/toolbar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -27,15 +27,21 @@ const ROLE_LABELS: Record<string, string> = {
   ],
   template: `
     <mat-toolbar class="app-header">
+      @if (showMenuButton) {
+        <button mat-icon-button class="menu-btn" (click)="menuToggle.emit()">
+          <mat-icon>menu</mat-icon>
+        </button>
+      }
+
       <span class="spacer"></span>
 
       <div class="user-trigger" [matMenuTriggerFor]="userMenu">
         <div class="avatar">{{ initials() }}</div>
-        <div class="user-info">
+        <div class="user-info hide-mobile">
           <span class="user-email">{{ user()?.email }}</span>
           <span class="user-role">{{ roleLabel() }}</span>
         </div>
-        <mat-icon class="chevron">expand_more</mat-icon>
+        <mat-icon class="chevron hide-mobile">expand_more</mat-icon>
       </div>
 
       <mat-menu #userMenu="matMenu" xPosition="before">
@@ -69,6 +75,8 @@ const ROLE_LABELS: Record<string, string> = {
       color: #1e293b;
     }
 
+    .menu-btn { color: #64748b; margin-right: 4px; }
+
     .spacer { flex: 1; }
 
     .user-trigger {
@@ -81,91 +89,45 @@ const ROLE_LABELS: Record<string, string> = {
       transition: background 0.15s;
     }
 
-    .user-trigger:hover {
-      background: #f1f5f9;
-    }
+    .user-trigger:hover { background: #f1f5f9; }
 
     .avatar {
-      width: 34px;
-      height: 34px;
-      background: #dbeafe;
-      color: #1d4ed8;
+      width: 34px; height: 34px;
+      background: #dbeafe; color: #1d4ed8;
       border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 0.85rem;
-      flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.85rem; flex-shrink: 0;
     }
 
-    .user-info {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      line-height: 1.2;
-    }
+    .user-info { display: flex; flex-direction: column; align-items: flex-start; line-height: 1.2; }
+    .user-email { font-size: 0.8rem; font-weight: 500; color: #1e293b; }
+    .user-role  { font-size: 0.72rem; color: #64748b; }
+    .chevron    { color: #94a3b8; font-size: 1.1rem; width: 1.1rem; height: 1.1rem; }
 
-    .user-email {
-      font-size: 0.8rem;
-      font-weight: 500;
-      color: #1e293b;
-    }
-
-    .user-role {
-      font-size: 0.72rem;
-      color: #64748b;
-    }
-
-    .chevron {
-      color: #94a3b8;
-      font-size: 1.1rem;
-      width: 1.1rem;
-      height: 1.1rem;
+    @media (max-width: 768px) {
+      .app-header { padding: 0 12px; }
+      .hide-mobile { display: none; }
     }
 
     .menu-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 14px 16px;
-      pointer-events: none;
+      display: flex; align-items: center; gap: 12px;
+      padding: 14px 16px; pointer-events: none;
     }
-
     .menu-avatar {
-      width: 38px;
-      height: 38px;
-      background: #dbeafe;
-      color: #1d4ed8;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: 700;
-      font-size: 0.9rem;
+      width: 38px; height: 38px; background: #dbeafe; color: #1d4ed8;
+      border-radius: 50%; display: flex; align-items: center; justify-content: center;
+      font-weight: 700; font-size: 0.9rem;
     }
-
-    .menu-email {
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: #1e293b;
-    }
-
-    .menu-role {
-      font-size: 0.75rem;
-      color: #64748b;
-    }
-
-    .logout-item {
-      color: #dc2626 !important;
-    }
-
-    .logout-item mat-icon {
-      color: #dc2626 !important;
-    }
+    .menu-email { font-size: 0.85rem; font-weight: 600; color: #1e293b; }
+    .menu-role  { font-size: 0.75rem; color: #64748b; }
+    .logout-item { color: #dc2626 !important; }
+    .logout-item mat-icon { color: #dc2626 !important; }
   `],
 })
 export class HeaderComponent {
+  @Input() showMenuButton = false;
+  @Output() menuToggle = new EventEmitter<void>();
+
   private readonly authService = inject(AuthService);
   readonly user = inject(TokenService).currentUser;
 

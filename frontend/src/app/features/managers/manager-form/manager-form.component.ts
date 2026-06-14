@@ -112,6 +112,10 @@ const PASSWORD_PATTERN = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z\d]).{8,}$
     .form-card { max-width: 600px; }
     .form { display: flex; flex-direction: column; gap: 8px; }
     .row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    @media (max-width: 600px) {
+      .form-card { max-width: 100%; }
+      .row { grid-template-columns: 1fr; }
+    }
     .actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
     .info-box {
       display: flex; align-items: flex-start; gap: 8px;

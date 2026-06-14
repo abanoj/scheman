@@ -132,6 +132,10 @@ const SHIFT_TYPES = [
     .actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 8px; }
     .hint { color: #64748b; font-size: 0.85rem; margin: 0; }
     .error-msg { color: #ef4444; font-size: 0.875rem; }
+    @media (max-width: 600px) {
+      .form-card { max-width: 100%; }
+      .row { grid-template-columns: 1fr; }
+    }
   `],
 })
 export class EmployeeFormComponent implements OnInit {

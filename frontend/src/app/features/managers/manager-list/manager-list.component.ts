@@ -114,8 +114,8 @@ import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialo
   `,
   styles: [`
     .toolbar { display: flex; justify-content: flex-end; margin-bottom: 16px; }
-    .table-wrapper { border-radius: 10px; overflow: hidden; background: #fff; }
-    table { width: 100%; }
+    .table-wrapper { border-radius: 10px; overflow-x: auto; background: #fff; }
+    table { width: 100%; min-width: 500px; }
     .spinner-center { display: flex; justify-content: center; padding: 48px; }
     .no-data { padding: 32px; text-align: center; color: #94a3b8; }
     .chip-active  { --mdc-chip-label-text-color: #059669; background: #d1fae5 !important; }

@@ -125,8 +125,8 @@ import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialo
   `,
   styles: [`
     .toolbar { display: flex; justify-content: flex-end; margin-bottom: 16px; }
-    .table-wrapper { border-radius: 10px; overflow: hidden; background: #fff; }
-    table { width: 100%; }
+    .table-wrapper { border-radius: 10px; overflow-x: auto; background: #fff; }
+    table { width: 100%; min-width: 600px; }
     .spinner-center { display: flex; justify-content: center; padding: 48px; }
     .name-link { font-weight: 500; color: #2563eb; text-decoration: none; }
     .name-link:hover { text-decoration: underline; }

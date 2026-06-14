@@ -108,6 +108,11 @@ const DAY_LABELS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
     @media (max-width: 900px) {
       .calendar { grid-template-columns: repeat(2, 1fr); }
     }
+    @media (max-width: 480px) {
+      .calendar { grid-template-columns: 1fr; }
+      .week-nav { flex-wrap: wrap; gap: 8px; }
+      .week-center { width: 100%; order: -1; }
+    }
 
     .day-cell {
       background: #fff; border: 1px solid #e2e8f0; border-radius: 12px;

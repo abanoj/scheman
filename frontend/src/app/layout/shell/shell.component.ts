@@ -1,6 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, inject, signal, ViewChild, OnInit, OnDestroy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
+import { BreakpointObserver } from '@angular/cdk/layout';
+import { Subscription } from 'rxjs';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { HeaderComponent } from '../header/header.component';
 
@@ -10,11 +12,20 @@ import { HeaderComponent } from '../header/header.component';
   imports: [RouterOutlet, MatSidenavModule, SidebarComponent, HeaderComponent],
   template: `
     <mat-sidenav-container class="shell-container">
-      <mat-sidenav mode="side" opened class="sidenav">
-        <app-sidebar />
+      <mat-sidenav
+        #sidenav
+        [mode]="isMobile() ? 'over' : 'side'"
+        [opened]="!isMobile()"
+        class="sidenav"
+      >
+        <app-sidebar (itemClicked)="onNavItemClicked()" />
       </mat-sidenav>
+
       <mat-sidenav-content class="main-content">
-        <app-header />
+        <app-header
+          [showMenuButton]="isMobile()"
+          (menuToggle)="sidenav.toggle()"
+        />
         <main class="page-content">
           <router-outlet />
         </main>
@@ -43,6 +54,32 @@ import { HeaderComponent } from '../header/header.component';
       padding: 28px 32px;
       overflow-y: auto;
     }
+    @media (max-width: 768px) {
+      .page-content { padding: 16px; }
+    }
   `],
 })
-export class ShellComponent {}
+export class ShellComponent implements OnInit, OnDestroy {
+  @ViewChild('sidenav') sidenav!: MatSidenav;
+
+  private readonly breakpointObserver = inject(BreakpointObserver);
+  private sub?: Subscription;
+
+  readonly isMobile = signal(false);
+
+  ngOnInit(): void {
+    this.sub = this.breakpointObserver
+      .observe('(max-width: 768px)')
+      .subscribe((state) => this.isMobile.set(state.matches));
+  }
+
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
+  }
+
+  onNavItemClicked(): void {
+    if (this.isMobile()) {
+      this.sidenav.close();
+    }
+  }
+}
