@@ -1,0 +1,38 @@
+@use '@angular/material' as mat;
+
+// ── Material Design 3 light theme ────────────────────────────────────────────
+$theme: mat.define-theme((
+  color: (
+    theme-type: light,
+    primary: mat.$azure-palette,
+  ),
+  typography: (
+    brand-family: 'Roboto',
+    plain-family: 'Roboto',
+  ),
+  density: (scale: 0),
+));
+
+html {
+  @include mat.all-component-themes($theme);
+}
+
+// ── Reset & base ──────────────────────────────────────────────────────────────
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+// ── Material overrides ────────────────────────────────────────────────────────
+mat-card {
+  border-radius: 12px !important;
+}
+
+.mat-mdc-card {
+  background: #ffffff !important;
+}
