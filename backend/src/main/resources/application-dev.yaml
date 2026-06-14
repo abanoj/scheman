@@ -13,7 +13,7 @@ spring:
     driver-class-name: org.postgresql.Driver
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     properties:
       hibernate:
         format_sql: false
@@ -29,7 +29,7 @@ server:
 ## Security
 application:
   cors:
-    allowed-origins: http://localhost:3000
+    allowed-origins: http://localhost:4200
   security:
     jwt:
       expiration: 900000
@@ -37,11 +37,14 @@ application:
         expiration: 604800000
       secret-key: ${JWT_SECRET}
     rate-limit:
-      max-attempts: 5
-      refill-minutes: 10
+      max-attempts: 10
+      refill-minutes: 5
   admin:
     email: admin@abanoj.com
     password: ${ADMIN_PASSWORD:admin123}
+  demo:
+    enabled: true
+    reset-cron: "0 0 */6 * * *"
 ## Swagger
 springdoc:
   swagger-ui:
