@@ -31,9 +31,19 @@ export interface EmployeeResponse {
   preferredShift: ShiftType;
   preferredStores: StoreSummaryResponse[];
   weeklyContractedHours: number;
+  enabled: boolean;
 }
 
 export interface EmployeeSummaryResponse {
   id: string;
   name: string;
+}
+
+export interface EmployeeWeeklyAvailability {
+  id: string;
+  firstName: string;
+  lastName: string;
+  weeklyContractedHours: number;
+  assignedHours: number;
+  availableHours: number;
 }

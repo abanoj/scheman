@@ -7,7 +7,9 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { ShiftService } from '../../../core/services/shift.service';
 import { StoreService } from '../../../core/services/store.service';
+import { ShiftAssignmentService } from '../../../core/services/shift-assignment.service';
 import { ShiftCoverageSlot } from '../../../core/models/shift.models';
+import { EmployeeWeeklyAvailability } from '../../../core/models/employee.models';
 import { PageHeaderComponent } from '../../../shared/components/page-header/page-header.component';
 
 interface DayColumn {
@@ -109,6 +111,40 @@ const DAY_LABELS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
       }
     }
 
+    <!-- Availability panel -->
+    <div class="availability-panel">
+      <div class="availability-header">
+        <span class="availability-title">
+          <mat-icon>people</mat-icon>
+          Disponibilidad del equipo
+        </span>
+        @if (!availabilityLoading() && availability().length) {
+          <span class="avail-count">{{ availability().length }} empleado(s) con horas libres</span>
+        }
+      </div>
+
+      @if (availabilityLoading()) {
+        <div class="avail-spinner"><mat-spinner diameter="24" /></div>
+      } @else if (!availability().length) {
+        <p class="avail-empty">Todos los empleados tienen sus horas cubiertas esta semana.</p>
+      } @else {
+        <div class="avail-grid">
+          @for (emp of availability(); track emp.id) {
+            <a class="avail-card" [routerLink]="['/employees', emp.id]">
+              <span class="avail-name">{{ emp.firstName }} {{ emp.lastName }}</span>
+              <div class="avail-hours-row">
+                <span class="avail-free">{{ formatHours(emp.availableHours) }}</span>
+                <span class="avail-meta">libres · {{ formatHours(emp.assignedHours) }}/{{ emp.weeklyContractedHours }}h</span>
+              </div>
+              <div class="avail-bar-bg">
+                <div class="avail-bar-fill" [style.width.%]="fillPercent(emp)"></div>
+              </div>
+            </a>
+          }
+        </div>
+      }
+    </div>
+
     <div class="back-row">
       <a mat-button [routerLink]="['/stores', storeId]">
         <mat-icon>arrow_back</mat-icon> Volver a la tienda
@@ -198,20 +234,63 @@ const DAY_LABELS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
     .rest-label { color: #cbd5e1; font-size: 0.78rem; font-style: italic; padding: 4px; }
 
     .back-row { margin-top: 24px; }
+
+    .availability-panel {
+      margin-top: 28px;
+      background: #fff;
+      border: 1px solid #e2e8f0;
+      border-radius: 12px;
+      padding: 16px 20px;
+    }
+    .availability-header {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 14px; flex-wrap: wrap;
+    }
+    .availability-title {
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.95rem; font-weight: 600; color: #0f172a;
+    }
+    .availability-title mat-icon { font-size: 1.1rem; width: 1.1rem; height: 1.1rem; color: #64748b; }
+    .avail-count { font-size: 0.8rem; color: #64748b; }
+    .avail-spinner { display: flex; padding: 16px; }
+    .avail-empty { color: #94a3b8; font-size: 0.875rem; margin: 0; }
+
+    .avail-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(155px, 1fr));
+      gap: 10px;
+    }
+    .avail-card {
+      background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px;
+      padding: 12px; display: flex; flex-direction: column; gap: 6px;
+      text-decoration: none; transition: border-color 0.15s, box-shadow 0.15s;
+    }
+    .avail-card:hover { border-color: #93c5fd; box-shadow: 0 0 0 1px #93c5fd; }
+    .avail-name {
+      font-size: 0.82rem; font-weight: 600; color: #1e293b;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .avail-hours-row { display: flex; align-items: baseline; gap: 5px; flex-wrap: wrap; }
+    .avail-free { font-size: 1rem; font-weight: 700; color: #059669; }
+    .avail-meta { font-size: 0.72rem; color: #94a3b8; }
+    .avail-bar-bg { height: 4px; background: #e2e8f0; border-radius: 4px; overflow: hidden; }
+    .avail-bar-fill { height: 100%; background: #f59e0b; border-radius: 4px; }
   `],
 })
 export class ShiftCoverageComponent implements OnInit {
   private readonly shiftService = inject(ShiftService);
   private readonly storeService = inject(StoreService);
+  private readonly assignmentService = inject(ShiftAssignmentService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
 
   readonly loading = signal(true);
+  readonly availabilityLoading = signal(true);
   readonly storeName = signal('');
   readonly weekRangeLabel = signal('');
   private readonly weekMonday = signal<Date>(this.mondayOf(new Date()));
   private readonly slots = signal<ShiftCoverageSlot[]>([]);
+  readonly availability = signal<EmployeeWeeklyAvailability[]>([]);
 
   storeId = '';
 
@@ -278,15 +357,30 @@ export class ShiftCoverageComponent implements OnInit {
     });
   }
 
+  formatHours(h: number): string {
+    return Number.isInteger(h) ? `${h}h` : `${h.toFixed(1)}h`;
+  }
+
+  fillPercent(emp: EmployeeWeeklyAvailability): number {
+    return Math.min(100, Math.round((emp.assignedHours / emp.weeklyContractedHours) * 100));
+  }
+
   private load(): void {
     this.loading.set(true);
+    this.availabilityLoading.set(true);
     const ref = this.toIso(this.weekMonday());
+
     this.shiftService.findWeeklyCoverage(this.storeId, ref).subscribe({
       next: (list) => { this.slots.set(list); this.loading.set(false); },
       error: () => {
         this.loading.set(false);
         this.snackBar.open('Error al cargar la cobertura', 'OK', { duration: 3000 });
       },
+    });
+
+    this.assignmentService.findWeeklyAvailability(ref).subscribe({
+      next: (list) => { this.availability.set(list); this.availabilityLoading.set(false); },
+      error: () => { this.availabilityLoading.set(false); },
     });
   }
 

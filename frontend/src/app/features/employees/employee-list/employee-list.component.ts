@@ -51,7 +51,12 @@ import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialo
           <ng-container matColumnDef="name">
             <th mat-header-cell *matHeaderCellDef>Nombre</th>
             <td mat-cell *matCellDef="let e">
-              <a class="name-link" [routerLink]="e.id">{{ e.firstName }} {{ e.lastName }}</a>
+              <div class="name-cell">
+                <a class="name-link" [class.disabled-name]="!e.enabled" [routerLink]="e.id">{{ e.firstName }} {{ e.lastName }}</a>
+                @if (!e.enabled) {
+                  <span class="disabled-badge">Deshabilitado</span>
+                }
+              </div>
             </td>
           </ng-container>
 
@@ -84,22 +89,15 @@ import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialo
               <a mat-icon-button [routerLink]="[e.id, 'edit']" matTooltip="Editar">
                 <mat-icon>edit</mat-icon>
               </a>
-              <button
-                mat-icon-button
-                color="warn"
-                (click)="confirmDisable(e)"
-                matTooltip="Deshabilitar"
-              >
-                <mat-icon>person_off</mat-icon>
-              </button>
-              <button
-                mat-icon-button
-                color="primary"
-                (click)="confirmEnable(e)"
-                matTooltip="Habilitar"
-              >
-                <mat-icon>how_to_reg</mat-icon>
-              </button>
+              @if (e.enabled) {
+                <button mat-icon-button color="warn" (click)="confirmDisable(e)" matTooltip="Deshabilitar">
+                  <mat-icon>person_off</mat-icon>
+                </button>
+              } @else {
+                <button mat-icon-button color="primary" (click)="confirmEnable(e)" matTooltip="Habilitar">
+                  <mat-icon>how_to_reg</mat-icon>
+                </button>
+              }
             </td>
           </ng-container>
 
@@ -128,8 +126,15 @@ import { ConfirmDialogComponent } from '../../../shared/components/confirm-dialo
     .table-wrapper { border-radius: 10px; overflow-x: auto; background: #fff; }
     table { width: 100%; min-width: 600px; }
     .spinner-center { display: flex; justify-content: center; padding: 48px; }
+    .name-cell { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
     .name-link { font-weight: 500; color: #2563eb; text-decoration: none; }
     .name-link:hover { text-decoration: underline; }
+    .name-link.disabled-name { color: #94a3b8; }
+    .disabled-badge {
+      font-size: 0.7rem; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase;
+      padding: 2px 8px; border-radius: 20px;
+      background: #fee2e2; color: #dc2626;
+    }
     .no-data { padding: 32px; text-align: center; color: #94a3b8; }
   `],
 })

@@ -9,6 +9,7 @@ import {
   ShiftAssignmentResponse,
   WeeklyAssignmentResponse,
 } from '../models/shift-assignment.models';
+import { EmployeeWeeklyAvailability } from '../models/employee.models';
 
 @Injectable({ providedIn: 'root' })
 export class ShiftAssignmentService {
@@ -49,6 +50,14 @@ export class ShiftAssignmentService {
     const params = new HttpParams().set('date', date);
     return this.http.get<WeeklyAssignmentResponse[]>(
       `${this.apiUrl}/shift-assignments/employees/${employeeId}/weekly`,
+      { params }
+    );
+  }
+
+  findWeeklyAvailability(date: string): Observable<EmployeeWeeklyAvailability[]> {
+    const params = new HttpParams().set('date', date);
+    return this.http.get<EmployeeWeeklyAvailability[]>(
+      `${this.apiUrl}/shift-assignments/employees/weekly-availability`,
       { params }
     );
   }
