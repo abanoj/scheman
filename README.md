@@ -18,7 +18,7 @@ API REST para la gestión de horarios de empleados en múltiples tiendas. Gestio
 
 ## Demo
 Pueden probar la app en:
-🔗 **[https://scheman-ui.onrender.com](https://scheman-ui.onrender.com)**
+🔗 **[https://scheman.abanoj.com/](https://scheman.abanoj.com/)**
 
 > Los datos de demo se reinician automáticamente cada 6 horas.
 > El servicio está en Render free tier — si lleva un rato inactivo puede tardar ~30 segundos en despertar.
