@@ -21,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -93,7 +94,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         employeeMapper.updateEmployeeFromDto(employeeUpdateRequestDto, employee);
 
         if (employeeUpdateRequestDto.preferredStoresIds() != null) {
-            List<Store> currentStores = employee.getPreferredStores();
+            List<Store> currentStores = new ArrayList<>(employee.getPreferredStores());
             currentStores.forEach(employee::removeStore);
 
             List<Store> newStores = storeRepository.findAllById(employeeUpdateRequestDto.preferredStoresIds());
