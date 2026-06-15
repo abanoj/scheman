@@ -1,5 +1,6 @@
 package com.abanoj.scheman.shiftassignment.service;
 
+import com.abanoj.scheman.employee.dto.EmployeeWeeklyAvailabilityDto;
 import com.abanoj.scheman.employee.entity.Employee;
 import com.abanoj.scheman.employee.repository.EmployeeRepository;
 import com.abanoj.scheman.exception.ConflictException;
@@ -24,9 +25,12 @@ import java.time.DayOfWeek;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -123,6 +127,39 @@ public class ShiftAssignmentServiceImpl implements ShiftAssignmentService{
                 .findByEmployeeIdAndDateBetween(employeeId, monday, sunday)
                 .stream()
                 .map(shiftAssignmentMapper::toWeeklyResponseDto)
+                .toList();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<EmployeeWeeklyAvailabilityDto> findWeeklyAvailability(LocalDate date) {
+        LocalDate monday = date.with(DayOfWeek.MONDAY);
+        LocalDate sunday = date.with(DayOfWeek.SUNDAY);
+
+        Map<UUID, Double> assignedByEmployee = shiftAssignmentRepository
+                .findAllByDateBetween(monday, sunday)
+                .stream()
+                .collect(Collectors.groupingBy(
+                        sa -> sa.getEmployee().getId(),
+                        Collectors.summingDouble(sa -> sa.getShift().getTotalHours())
+                ));
+
+        return employeeRepository.findAllEnabledWithUser().stream()
+                .filter(e -> e.getWeeklyContractedHours() != null)
+                .map(e -> {
+                    double assigned = assignedByEmployee.getOrDefault(e.getId(), 0.0);
+                    double available = Math.max(0.0, e.getWeeklyContractedHours() - assigned);
+                    return new EmployeeWeeklyAvailabilityDto(
+                            e.getId(),
+                            e.getUser().getFirstName(),
+                            e.getUser().getLastName(),
+                            e.getWeeklyContractedHours(),
+                            assigned,
+                            available
+                    );
+                })
+                .filter(dto -> dto.availableHours() > 0)
+                .sorted(Comparator.comparingDouble(EmployeeWeeklyAvailabilityDto::availableHours).reversed())
                 .toList();
     }
 

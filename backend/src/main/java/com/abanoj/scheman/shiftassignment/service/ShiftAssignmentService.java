@@ -1,5 +1,6 @@
 package com.abanoj.scheman.shiftassignment.service;
 
+import com.abanoj.scheman.employee.dto.EmployeeWeeklyAvailabilityDto;
 import com.abanoj.scheman.shiftassignment.dto.ShiftAssignmentCreateRequestDto;
 import com.abanoj.scheman.shiftassignment.dto.ShiftAssignmentResponseDto;
 import com.abanoj.scheman.shiftassignment.dto.ShiftAssignmentUpdateRequestDto;
@@ -18,5 +19,6 @@ public interface ShiftAssignmentService {
     ShiftAssignmentResponseDto createShiftAssignment(UUID shiftId, ShiftAssignmentCreateRequestDto shiftAssignmentCreateRequestDto);
     ShiftAssignmentResponseDto updateShiftAssignment(UUID shiftId, UUID id, ShiftAssignmentUpdateRequestDto shiftAssignmentUpdateRequestDto);
     List<WeeklyAssignmentResponseDto> findWeeklyAssignmentsByEmployee(UUID employeeId, LocalDate date);
+    List<EmployeeWeeklyAvailabilityDto> findWeeklyAvailability(LocalDate date);
     void delete(UUID shiftId, UUID id);
 }
