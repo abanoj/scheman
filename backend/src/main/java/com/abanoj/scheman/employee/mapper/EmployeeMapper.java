@@ -15,6 +15,7 @@ public interface EmployeeMapper {
     @Mapping(source = "user.firstName", target = "firstName")
     @Mapping(source = "user.lastName", target = "lastName")
     @Mapping(source = "user.email", target = "email")
+    @Mapping(source = "user.enabled", target = "enabled")
     EmployeeResponseDto toResponseUserEmployeeDto(Employee employee, User user);
 
     @Mapping(target = "name",

@@ -92,7 +92,8 @@ class EmployeeControllerTest {
                 userId,
                 ShiftType.MORNING,
                 List.of(storeSummary),
-                40
+                40,
+                true
         );
     }
 
@@ -346,7 +347,7 @@ class EmployeeControllerTest {
             //given
             EmployeeResponseDto updatedResponse = new EmployeeResponseDto(
                     employeeId, "Y8479910J", "Jane", "Doe", "john@doe.com",
-                    userId, ShiftType.AFTERNOON, List.of(), 40
+                    userId, ShiftType.AFTERNOON, List.of(), 40, true
             );
             given(employeeService.updateEmployee(eq(employeeId), any(EmployeeUpdateRequestDto.class)))
                     .willReturn(updatedResponse);

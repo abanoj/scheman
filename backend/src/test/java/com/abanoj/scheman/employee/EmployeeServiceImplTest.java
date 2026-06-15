@@ -99,7 +99,8 @@ public class EmployeeServiceImplTest {
                 user.getId(),
                 employee.getPreferredShift(),
                 null,
-                employee.getWeeklyContractedHours()
+                employee.getWeeklyContractedHours(),
+                user.isEnabled()
         );
     }
 
@@ -255,7 +256,8 @@ public class EmployeeServiceImplTest {
                     user.getId(),
                     employeeUpdateRequestDto.preferredShift(),
                     null,
-                    employee.getWeeklyContractedHours()
+                    employee.getWeeklyContractedHours(),
+                    user.isEnabled()
             );
         }
 

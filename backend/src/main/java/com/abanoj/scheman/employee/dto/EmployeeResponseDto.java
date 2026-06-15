@@ -25,6 +25,8 @@ public record EmployeeResponseDto(
         @Schema(description = "Preferred stores", example = "SAN BLAS, TOROS,...")
         List<StoreSummaryResponseDto> preferredStores,
         @Schema(description = "Weekly contracted hours", example = "40")
-        Integer weeklyContractedHours
+        Integer weeklyContractedHours,
+        @Schema(description = "Whether the employee account is enabled", example = "true")
+        boolean enabled
 ) {
 }
